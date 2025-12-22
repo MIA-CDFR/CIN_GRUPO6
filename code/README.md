@@ -59,3 +59,24 @@ ipykernel (>=7.1.0,<8.0.0)
 folium (>=0.20.0,<0.21.0)
 scikit-learn (>=1.8.0,<2.0.0)
 ```
+
+# 🖥️ Como Executar
+Para iniciar a interface de busca ou correr a simulação:
+
+```bash
+python main.py
+```
+
+## 📓 Execução Interativa (Jupyter Notebook)
+
+Para uma exploração detalhada, visualização de mapas interativos e análise passo-a-passo dos algoritmos, podes utilizar o notebook principal do projeto:
+
+Arquivo: [route-optimization-optimized.ipynb](./notebook/route-optimization-optimized.ipynb)
+
+# 🧠 Algoritmos Implementados
+
+| Algoritmo |Foco | Uso Ideal |
+| -------- | ------- | ------- |
+| A Optimized* | Velocidade e Eficiência | Utilização em tempo real (Mobile/Web) |
+| Dijkstra Pareto | Rigor e Exaustividade | Planeamento de rede e análise técnica |
+| ACO (Bio-Inspirado) | Rotas Criativas | Estudos de comportamento de passageiros |
