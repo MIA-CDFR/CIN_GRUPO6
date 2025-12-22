@@ -1,4 +1,4 @@
-# GRUPO6
+# GRUPO 6
  - PG11605 - Carlos da Mota Bergueira 
  - PG59999 - Diego Jefferson Mendes Silva 
  - PG42201 - Filipa Araújo Pereira
