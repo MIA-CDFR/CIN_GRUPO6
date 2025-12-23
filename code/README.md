@@ -58,6 +58,8 @@ geopy (>=2.4.1,<3.0.0)
 ipykernel (>=7.1.0,<8.0.0)
 folium (>=0.20.0,<0.21.0)
 scikit-learn (>=1.8.0,<2.0.0)
+seaborn (>=0.13.2,<0.14.0)
+matplotlib (>=3.10.8,<4.0.0)
 ```
 
 # 🖥️ Como Executar
