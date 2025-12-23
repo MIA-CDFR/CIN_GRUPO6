@@ -116,13 +116,15 @@ class GraphRoute:
             SOURCE_NODE_ID,
             y=self.geo_origem.y,
             x=self.geo_origem.x,
-            name="Ponto de Partida"
+            name="Ponto de Partida",
+            osmnx_node=ox.nearest_nodes(self.G_walk, self.geo_origem.x, self.geo_origem.y),
         )
         self.G.add_node(
             DESTINATION_NODE_ID,
             y=self.geo_destino.y,
             x=self.geo_destino.x,
-            name="Ponto de Chegada"
+            name="Ponto de Chegada",
+            osmnx_node=ox.nearest_nodes(self.G_walk, self.geo_destino.x, self.geo_destino.y),
         )
 
         user_points = [
