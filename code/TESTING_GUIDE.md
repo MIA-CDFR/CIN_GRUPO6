@@ -795,8 +795,8 @@ Depois de executar os testes:
 ## Referências
 
 - [README Principal](README.md) - Descrição completa do projeto
-- [MANUAL_UTILIZADOR.md](MANUAL_UTILIZADOR.md) - Guia prático para utilizadores
-- [code/README.md](README.md) - Documentação técnica detalhada
+- [USER_GUIDE.md](USER_GUIDE.md) - Guia prático para utilizadores
+- [code/TECHNICAL_DOCUMENTATION.md](TECHNICAL_DOCUMENTATION.md) - Documentação técnica detalhada
 - Algoritmos: `app/services/algoritms/`
 - Casos: `app/test_cases.py`
 - Framework: `app/evaluation_framework.py`

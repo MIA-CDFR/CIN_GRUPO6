@@ -63,8 +63,8 @@ Deverá ver um resumo dos 22 casos de teste disponíveis.
 
 ```
 code/
-├── README.md                    # Este ficheiro
-├── MANUAL_UTILIZADOR.md         # Guia completo de uso
+├── TECHNICAL_DOCUMENTATION.md   # Este ficheiro
+├── USER_GUIDE.md                # Guia completo de uso
 ├── requirements.txt             # Dependências Python
 ├── pyproject.toml               # Configuração Poetry
 │
@@ -306,7 +306,7 @@ O projeto inclui **22 casos de teste** para validação e comparação dos algor
 
 ## 📖 Documentação
 
-- **[MANUAL_UTILIZADOR.md](MANUAL_UTILIZADOR.md)**: Guia completo com exemplos práticos
+- **[USER_GUIDE.md](USER_GUIDE.md)**: Guia completo com exemplos práticos
 - **[route-optimization-optimized.ipynb](notebook/route-optimization-optimized.ipynb)**: Análise interativa
 - **Código comentado**: Cada ficheiro tem documentação em docstrings
 
@@ -353,7 +353,7 @@ python -m app.test_cases
 
 - Verificar coordenadas (devem ser no Porto)
 - Testar com casos de teste primeiro: `python -m app.test_cases`
-- Ver [MANUAL_UTILIZADOR.md](MANUAL_UTILIZADOR.md) secção "Resolução de Problemas"
+- Ver [USER_GUIDE.md](USER_GUIDE.md) secção "Resolução de Problemas"
 
 ### Algoritmo muito lento
 
