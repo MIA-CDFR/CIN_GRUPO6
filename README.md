@@ -1176,8 +1176,6 @@ CIN_GRUPO6/
 │   │
 │   └── notebook/                      # Jupyter Notebooks (exploração interativa)
 │       └── route-optimization-optimized.ipynb
-│
-└── relatorio/                         # Documentação de relatórios
 ```
 
 ### Descrição dos Ficheiros Principais
