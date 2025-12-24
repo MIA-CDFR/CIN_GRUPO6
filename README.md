@@ -42,7 +42,7 @@ O sistema retorna uma **Fronteira de Pareto** - um conjunto de rotas onde nenhum
 ### ✨ Características Principais
 
 ✅ **Otimização Multi-Objetivo**: Três critérios simultâneos com fronteira Pareto rigorosa  
-✅ **Dados Reais**: Integração com GTFS (Metro do Porto, STCP) e OpenStreetMap  
+✅ **Dados Reais**: Integração com GTFS (Metro do Porto, STCP) e OSMnx  
 ✅ **3 Algoritmos Avançados**: A* Heurístico, Dijkstra Exaustivo, ACO Estocástico  
 ✅ **Análise Geográfica**: Ruas reais (OSMnx), não linhas retas  
 ✅ **22 Casos de Teste**: Cobertura de trivial a extremo  
