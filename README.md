@@ -74,25 +74,44 @@ python -m app.test_cases
 ```python
 from app.services.graph import GraphRoute
 from app.services.algoritms.a_star import optimized_multi_objective_routing
+from app.services.algoritms.dijkstra import dijkstra_multi_objective
+from app.services.algoritms.aco import aco_optimized_routing
+from app.utils.time import time_to_seconds
 
 # Carregar grafo
+# Rotas: Casa da Musica → Casino da Póvoa de Varzim, 4490-403
 graph = GraphRoute(
     origem="Casa da Musica",
     destino="Casino da Póvoa de Varzim, 4490-403",
 )
 
-# Rotas: Casa da Musica → Casino da Póvoa de Varzim, 4490-403
-origin = "Casa da Musica"
-destination = "Casino da Póvoa de Varzim, 4490-403"
 START_TIME = '08:00:00'
 
 # Executar A*
 a_star_pareto_solutions = optimized_multi_objective_routing(
-    graph.G, graph.origem_node_id, graph.destino_node_id, start_sec
+    graph.G, graph.origem_node_id, graph.destino_node_id, time_to_seconds(START_TIME)
 )
 
 # Ver resultados
 for i, sol in enumerate(a_star_pareto_solutions, 1):
+    print(f"Rota {i}: {sol.total_time//60}min | {sol.total_co2:.0f}g CO₂ | {sol.total_walk_km:.1f}km caminhada")
+
+# Executar Dijkstra
+dijkstra_pareto_solutions = dijkstra_multi_objective(
+    graph.G, graph.origem_node_id, graph.destino_node_id, time_to_seconds(START_TIME)
+)
+
+# Ver resultados
+for i, sol in enumerate(dijkstra_pareto_solutions, 1):
+    print(f"Rota {i}: {sol.total_time//60}min | {sol.total_co2:.0f}g CO₂ | {sol.total_walk_km:.1f}km caminhada")
+
+# Executar ACO
+aco_pareto_solutions = aco_optimized_routing(
+    graph.G, graph.origem_node_id, graph.destino_node_id, time_to_seconds(START_TIME)
+)
+
+# Ver resultados
+for i, sol in enumerate(aco_pareto_solutions, 1):
     print(f"Rota {i}: {sol.total_time//60}min | {sol.total_co2:.0f}g CO₂ | {sol.total_walk_km:.1f}km caminhada")
 ```
 
@@ -114,7 +133,7 @@ CIN_GRUPO6/
     ├── requirements.txt                   # 📋 Dependências Python
     │
     ├── app/                               # 🚀 Aplicação principal
-    │   ├── main.py                        # 🔌 API REST (FastAPI)
+    │   ├── main.py                        # 🔌 Exemplo Chamada
     │   ├── test_cases.py                  # 🧪 22 casos de teste
     │   │
     │   ├── models/                        # 📊 Modelos de dados
@@ -158,7 +177,6 @@ CIN_GRUPO6/
 
 | Ficheiro | Descrição | Responsabilidade |
 |----------|-----------|-----------------|
-| **main.py** | 🔌 API REST | Exposição de endpoints FastAPI |
 | **test_cases.py** | 🧪 Suite de testes | 22 casos de teste (trivial → extremo) |
 | **solution.py** | 🎯 Classe Solution | Rotas com 3 critérios (tempo, CO₂, caminhada) |
 | **a_star.py** | ⚡ Algoritmo A* | Heurístico: rápido (2-5s), ~85% Pareto |
@@ -314,7 +332,7 @@ A*: 2 segundos, encontra 3-4 soluções Pareto
 #### 🔍 Dijkstra (Exaustivo) - Ground Truth
 
 **Características:**
-- **Velocidade:** O(n²) sem heurística - **LENTO** mas completo
+- **Velocidade:** O(n²) sem heurística - **PODE SER LENTO - DEPENDENDO DO TAMANHO DO GRAFO** mas completo
 - **Qualidade:** **GARANTE** fronteira Pareto ótima (100% confiável)
 - **Uso:** Validação, benchmarking, análise offline
 - **Método:** Explora TODOS os caminhos possíveis
@@ -338,7 +356,7 @@ Enquanto houver nós não visitados:
 
 **Limitações:**
 
-❌ Muito lento (~30-60 segundos em redes grandes)  
+❌ Lento (Pode demorar em redes grandes)  
 ❌ Impraticável para aplicações interativas em tempo real
 
 **Exemplo prático:**
@@ -374,7 +392,7 @@ Resultado: Convergência para rotas de qualidade
 
 ✅ **Encontra soluções criativas** que algoritmos determinísticos perdem  
 ✅ Excelente em grafos com **baixa conectividade** (múltiplas modas)  
-✅ Tempo configurável (2-10 segundos)  
+✅ Tempo configurável
 ✅ Paralelizável (múltiplas colônias)  
 ✅ Mais "humano" - incorpora preferências variáveis
 
@@ -404,7 +422,7 @@ ACO: 5 segundos, encontra 4 soluções (inclui 1 alternativa inesperada)
 
 | Critério | A* | Dijkstra | ACO |
 |----------|-----|----------|-----|
-| **Tempo** | 2-5s | 30-60s | 3-10s |
+| **Tempo** | Rápido | Rápido-Médio | Médio |
 | **Qualidade Pareto** | 70-90% | 100% ✅ | 60-85% |
 | **Soluções criativas** | ❌ | ❌ | ✅ |
 | **Determinístico** | ✅ | ✅ | ❌ |
@@ -426,11 +444,6 @@ CENÁRIO 3: Explorar alternativas criativas
 CENÁRIO 4: Estudo académico completo
 └─ USE TODOS os 3 (comparação A*/Dijkstra/ACO)
 ```
-
-**Implementação:**
-- Interface comum: `routing_algorithm(graph, origin, destination, start_time) → List[Solution]`
-- Comparação automática via `evaluation_framework.py`
-- 22 casos de teste para validação relativa
 
 ---
 
@@ -684,7 +697,6 @@ Tempo típico: **2-10 segundos** (configurável ajustando $I$ e $A$)
 | **Completude** | ✅ Sim (se existe sol.) | ✅ Sim | ❌ Não (assintótica) |
 | **Optimalidade** | ✅ Sim (com boa heurística) | ✅ Sim (prova Bellman) | ❌ Não |
 | **Complexidade** | O(b^d) com heurística | O(n²) | O(I×A×P) |
-| **Tempo prático** | 2-5s | 30-60s | 3-10s |
 | **Soluções Pareto** | ~70-90% | ~100% | ~60-85% (criativas) |
 
 **Diagrama de Decisão Teórico:**
@@ -737,7 +749,7 @@ Necessito garantia 100% ótima?
    └─ Fronteira Pareto com até 15 soluções diversas
 ```
 
-**Código Real:**
+**Código:**
 
 ```python
 # Extraído de services/algoritms/a_star.py
@@ -797,15 +809,15 @@ def optimized_multi_objective_routing(G, source, destination, start_time_sec):
 - ✅ Heurística admissível (nunca sobrestima)
 - ✅ Busca focada no destino (reduz expansões)
 - ✅ Pruning agressivo de dominância
-- ✅ Rápido: 2-5 segundos típicamente
+- ✅ Rápido: alguns segundos típicamente
 
 **Performance em Porto:**
 ```
-Origem: Bolhão | Destino: Matosinhos | Hora: 14:00
-Nós expandidos: 234
-Arestas exploradas: 1,203
-Soluções Pareto encontradas: 4
-Tempo de execução: 3.2s
+Origem: Campanhã, Porto | Destino: Francelos, Vila Nova de Gaia | Hora: 11:00
+Nós expandidos: 641
+Arestas exploradas: 2,179
+Soluções Pareto encontradas: 3
+Tempo de execução: 0.28s
 ```
 
 ---
@@ -902,11 +914,11 @@ def dijkstra_multi_objective(G, source, destination, start_time_sec):
 
 **Performance em Porto:**
 ```
-Origem: Bolhão | Destino: Matosinhos | Hora: 14:00
-Nós expandidos: 1,247 (5x mais que A*)
-Arestas exploradas: 8,923
-Soluções Pareto encontradas: 6 (2 extra em relação a A*)
-Tempo de execução: 47.3s
+Origem: Campanhã, Porto | Destino: Francelos, Vila Nova de Gaia | Hora: 11:00
+Nós expandidos: 641
+Arestas exploradas: 2,179
+Soluções Pareto encontradas: 6
+Tempo de execução: 0.03s
 Garantia: 100% ótimas
 ```
 
@@ -1045,12 +1057,11 @@ def aco_optimized_routing(G, source, destination, start_time_sec,
 
 **Performance em Porto:**
 ```
-Origem: Bolhão | Destino: Matosinhos | Hora: 14:00
-Formigas: 30 | Iterações: 20
-Caminhos construídos: 600
-Soluções Pareto encontradas: 5 (inclui 1 alternativa criativa!)
-Tempo de execução: 6.1s
-Vantagem: Descobriu rota via Livraria que A* nunca vê!
+Origem: Campanhã, Porto | Destino: Francelos, Vila Nova de Gaia | Hora: 11:00
+Nós expandidos: 641
+Arestas exploradas: 2,179
+Soluções Pareto encontradas: 0
+Tempo de execução: 3.3s
 ```
 
 ---
@@ -1063,7 +1074,7 @@ Vantagem: Descobriu rota via Livraria que A* nunca vê!
 ┌─────────────────────────────────────────────────┐
 │                    A* HEURÍSTICO                │
 ├─────────────────────────────────────────────────┤
-│ Tempo:       3.2 segundos ✅ RÁPIDO             │
+│ Tempo:       ✅ RÁPIDO                          │
 │ Soluções:    4 rotas Pareto                     │
 │             ├─ Rota 1: 28min, 450g, 1.5km      │
 │             ├─ Rota 2: 32min, 320g, 3.2km      │
@@ -1076,7 +1087,7 @@ Vantagem: Descobriu rota via Livraria que A* nunca vê!
 ┌─────────────────────────────────────────────────┐
 │               DIJKSTRA EXAUSTIVO                │
 ├─────────────────────────────────────────────────┤
-│ Tempo:       47.3 segundos ⏳ LENTO            │
+│ Tempo:       ✅ RÁPIDO                          │
 │ Soluções:    6 rotas Pareto (TODAS ótimas)     │
 │             ├─ Rota 1: 28min, 450g, 1.5km      │
 │             ├─ Rota 2: 32min, 320g, 3.2km      │
@@ -1091,7 +1102,7 @@ Vantagem: Descobriu rota via Livraria que A* nunca vê!
 ┌─────────────────────────────────────────────────┐
 │             ACO (EXPLORAÇÃO CRIATIVA)           │
 ├─────────────────────────────────────────────────┤
-│ Tempo:       6.1 segundos ✅ RÁPIDO             │
+│ Tempo:       ✅ RÁPIDO                          │
 │ Soluções:    5 rotas Pareto (inclui criativos) │
 │             ├─ Rota 1: 28min, 450g, 1.5km      │
 │             ├─ Rota 2: 32min, 320g, 3.2km      │
@@ -1105,7 +1116,7 @@ Vantagem: Descobriu rota via Livraria que A* nunca vê!
 ```
 
 **Insights:**
-- A* é mais rápido que Dijkstra, perdendo 2 soluções
+- A* é por vezes mais rápido que Dijkstra, perdendo 2 soluções
 - Dijkstra encontrou 2 soluções intermédias que A* perdeu
 - ACO encontrou 1 rota criativa (35min, mas muito verde = 280g)
 - **Conclusão:** Usar **A* para utilizador interativo**, **Dijkstra para validação**, **ACO para exploração**
@@ -1114,7 +1125,7 @@ Vantagem: Descobriu rota via Livraria que A* nunca vê!
 
 ### 3. Grafo Multimodal com Integração GTFS + OSMnx
 
-**Decisão:** Integrar **dois grafos diferentes** em um único grafo híbrido.
+**Decisão:** Integrar **dois grafos diferentes** em um único grafo híbrido, a partir das coordenadas da origem e do destino de forma a otimizar o número de nós e arestas.
 
 **Justificação:**
 - **GTFS (Transportes Públicos):** Nós = paragens, arestas = viagens (com horários)
@@ -1129,7 +1140,10 @@ Vantagem: Descobriu rota via Livraria que A* nunca vê!
 **Implementação:**
 ```python
 # Pseudo-código
-G = GraphRoute()
+G = GraphRoute(
+  origem="Bolhão",
+  destino="Matosinhos"
+)
 # Adicionar nós GTFS
 for paragem in gtfs.stops:
     G.add_node(paragem.stop_id, type='transit_stop', coords=...)
@@ -1213,9 +1227,9 @@ Função add_solution_with_diversity(solution, frontier):
 
 ---
 
-### 7. Análise Geográfica com Distâncias Reais (não Euclidianas)
+### 7. Análise Geográfica com Distâncias Euclidianas, mas com dados de ruas reais após soluções
 
-**Decisão:** Calcular distâncias seguindo **ruas reais** via OpenStreetMap em vez de linhas retas.
+**Decisão:** Calcular distâncias seguindo a distância euclidiana penalizada, mas uma vez encontrada as soluções obtem os nós das **ruas reais** via OSMnx em vez de linhas retas.
 
 **Justificação:**
 - **Realismo:** Distância euclidiana pode ser 30-50% menor que distância real
@@ -1223,8 +1237,8 @@ Função add_solution_with_diversity(solution, frontier):
 - **Integração:** OSMnx fornece acesso fácil ao grafo de ruas
 
 **Implementação:**
-- `graph.py` carrega grafo de ruas com `osmnx.graph_from_bbox()`
-- Usa algoritmo Dijkstra de NetworkX para caminho mais curto a pé
+- `graph.py` carrega grafo de ruas com `osmnx.graph_from_point()`
+- Usa algoritmo A*/Dijkstra/ACO percorrendo o grafo em NetworkX para caminho mais curto a pé
 - Distância = soma dos comprimentos das arestas das ruas
 
 ---
@@ -1235,18 +1249,18 @@ Função add_solution_with_diversity(solution, frontier):
 
 **Justificação:**
 - **Sustentabilidade:** CO₂ é proxy para impacto ambiental
-- **Realismo:** Metro tem ~70g CO₂/passageiro/km; autocarro ~100g; a pé ~0g
+- **Realismo:** Metro tem ~40g CO₂/passageiro/km; autocarro ~109.9g; a pé ~0g
 - **Comparação:** Permite trade-off quantitativo entre velocidade e sustentabilidade
 
 **Fórmula:**
 $$\text{CO2}(rota) = \sum_{\text{segmento}} (\text{distância} \times \text{emissão\_específica})$$
 
 **Valores por modo:**
-| Modo | Emissão (g/km) | Fonte |
-|------|---|---|
-| Metro | 70 | LIPASTO/VTT |
-| Autocarro | 100 | LIPASTO/VTT |
-| Caminhada | 0 | N/A |
+| Modo | Emissão (g/km) |
+|------|---|
+| Metro | 40 |
+| Autocarro | 109.9 |
+| Caminhada | 0 |
 
 ---
 
@@ -1262,7 +1276,6 @@ $$\text{CO2}(rota) = \sum_{\text{segmento}} (\text{distância} \times \text{emis
 
 **Classes:**
 ```python
-@dataclass
 class Solution:
     total_time: int           # segundos
     total_co2: float          # gramas
@@ -1274,7 +1287,6 @@ class Solution:
         """Retorna True se esta solução domina outra"""
         ...
 
-@dataclass
 class GraphRoute:
     """Grafo multimodal com métodos para roteamento"""
     ...
@@ -1374,7 +1386,6 @@ Notação: $a \succ b$
 **Classe Solution:**
 
 ```python
-@dataclass
 class Solution:
     total_time: int           # [segundos] Tempo acumulado desde partida
     total_co2: float          # [gramas] Emissões de CO2 totais
@@ -1637,18 +1648,18 @@ Isto reforça rotas boas e evita convergência prematura.
 #### A*
 - Termina quando fila OPEN vazia
 - Todas as soluções ao destino foram colectadas
-- **Tempo típico:** 2-5 segundos (Porto metro-area)
+- **Tempo típico:** Poucos segundos (Porto metro-area)
 
 #### Dijkstra
 - Termina quando fila vazia
 - **Propriedade:** Expansões mais conservadoras que A*
-- **Tempo típico:** 5-15 segundos (Porto metro-area)
+- **Tempo típico:** poucos segundos (Porto metro-area)
 - **Garantia:** Fronteira Pareto ótima (com máx labels=8)
 
 #### ACO
 - Termina após N iterações (20 por padrão)
 - Não há garantia de otimalidade
-- **Tempo típico:** 10-20 segundos
+- **Tempo típico:** poucos segundos
 - **Benefício:** Encontra rotas criativas (especialmente útil em madrugadas/baixa conectividade)
 
 ---
@@ -2000,23 +2011,23 @@ Saída:
 
 #### 2. Testar um Caso Específico
 ```python
-from app.test_cases import TestCaseEvaluator, TEST_CASES
+from app.test_cases import TestCaseEvaluator
 from app.services.algoritms.a_star import optimized_multi_objective_routing
-from app.utils.geo import get_geocode_by_address
+from app.utils.time import time_to_seconds
 from datetime import datetime
 
 # Selecionar caso
 test_case = TestCaseEvaluator.get_by_id("TC-3.1")
 
-# Geocodificar
-origin = get_geocode_by_address(test_case['origem'])
-destination = get_geocode_by_address(test_case['destino'])
-start_time = datetime.strptime(test_case['start_time'], "%H:%M:%S").time()
+start_time = time_to_seconds(datetime.strptime(test_case['start_time'], "%H:%M:%S").time())
 
 # Executar algoritmo
 from app.services.graph import GraphRoute
-graph = GraphRoute()
-routes = optimized_multi_objective_routing(graph, (origin.y, origin.x), (destination.y, destination.x), start_time)
+graph = GraphRoute(
+    origem=test_case['origem'],
+    destino=test_case['destino'],
+)
+routes = optimized_multi_objective_routing(graph.G, graph.origem_node_id, graph.destino_node_id, start_time)
 
 # Validar
 is_valid, violations = TestCaseEvaluator.validate_solution(routes[0], test_case)
@@ -2025,15 +2036,16 @@ print(f"✓ Válido!" if is_valid else f"✗ Violações: {violations}")
 
 #### 3. Executar Comparação de Algoritmos
 ```python
+from app.test_cases import TestCaseEvaluator
 from app.evaluation_framework import ComparativeEvaluator
 
 evaluator = ComparativeEvaluator()
 result = evaluator.run_single_test(
-    test_case=TEST_CASES[0],
-    algorithms=['a_star', 'dijkstra', 'aco']
+    test_case=TestCaseEvaluator.get_by_id("TC-3.1"),
+    verbose=True
 )
 
-evaluator.print_comparison_table([result])
+evaluator.print_comparison_table()
 ```
 
 ---
@@ -2091,7 +2103,7 @@ Para cada caso de teste, o sistema é considerado **bem-sucedido** quando:
 
 ### Pré-requisitos
 - **Python 3.12+**
-- **Poetry 1.8+** (recomendado)
+- **Poetry 2.0+** (recomendado)
 - **Git**
 - **4 GB RAM**
 
@@ -2122,20 +2134,6 @@ python -m app.utils.loaddata
 ```
 
 Isto popula `feeds/gtfs_metro` e `feeds/gtfs_stcp` com os ficheiros necessários.
-
----
-
-### 📦 Dependências Principais
-
-| Biblioteca | Versão | Propósito |
-|-----------|--------|----------|
-| **pandas** | 2.3.3+ | Dados GTFS |
-| **networkx** | 3.6.1+ | Grafos |
-| **osmnx** | 2.0.7+ | OpenStreetMap |
-| **scipy** | 1.16.3+ | Algoritmos |
-| **folium** | 0.20.0+ | Mapas |
-
-Ver [requirements.txt](code/requirements.txt) para lista completa.
 
 ---
 
@@ -2192,7 +2190,7 @@ mapa = create_comparison_map_detailed(solutions, grafo, stops_df)
 
 ### 2. Gestor de Dependências e Empacotamento
 
-#### **Poetry** (v1.8+) ✅
+#### **Poetry** (v2.0+) ✅
 - **Função:** Gestão declarativa de dependências e ambientes virtuais
 - **Justificação:**
   - Resolução automática de conflitos de dependências
@@ -2376,15 +2374,15 @@ mapa = create_comparison_map_detailed(solutions, grafo, stops_df)
 
 ### Pré-requisitos
 - Python 3.12+
-- Poetry 1.8+
+- Poetry 2.0+
 - Git
-- Conexão à internet (para primeira execução)
+- Conexão à internet
 
 ### Passos
 
 #### 1. Clonar o repositório
 ```bash
-git clone <repository-url>
+git clone https://github.com/seu-usuario/CIN_GRUPO6.git
 cd CIN_GRUPO6/code
 ```
 
@@ -2525,4 +2523,3 @@ Os dados GTFS e mapas utilizados estão sob as seguintes licenças:
 
 **Versão:** 1.0
 **Última atualização:** Dezembro 2025
-**Status:** Produção

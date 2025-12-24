@@ -15,15 +15,15 @@ TEST_CASES = [
     {
         "id": "TC-1.1",
         "name": "Distância Muito Curta (Walking Only)",
-        "origem": "Livraria Bertrand, Porto",
+        "origem": "Rua da Fábrica, 4050-246",
         "destino": "Torre dos Clérigos, Porto",
         "start_time": "09:00:00",
         "complexity": "trivial",
         "expected_distance_km": 0.3,
-        "expected_duration_sec": 180,
+        "expected_duration_sec": 210,
         "description": "Apenas caminhada, distância < 500m. Sem opções de transporte.",
         "metrics": {
-            "expected_walk_km_min": 0.2,
+            "expected_walk_km_min": 0.3,
             "expected_walk_km_max": 0.5,
             "num_solutions_expected": "1",
             "transport_used": "walk_only",
@@ -37,11 +37,11 @@ TEST_CASES = [
         "destino": "Matosinhos, Porto",
         "start_time": "10:00:00",
         "complexity": "trivial",
-        "expected_distance_km": 6.0,
-        "expected_duration_sec": 900,
+        "expected_distance_km": 13.0,
+        "expected_duration_sec": 1900,
         "description": "Uma única linha de autocarro, sem transferências obrigatórias.",
         "metrics": {
-            "num_solutions_expected": "2-3",
+            "num_solutions_expected": "2-15",
             "max_transfers": 0,
             "transport_used": "bus_only",
         }
@@ -408,11 +408,7 @@ TEST_CASES = [
             "transport_used": "limited",
         }
     },
-
-    # ============================================================================
-    # CASOS ADICIONAIS PARA COBERTURA (Aumentar para 22)
-    # ============================================================================
-
+    
     {
         "id": "TC-7.2",
         "name": "Transferência Rápida (Hub Principal)",

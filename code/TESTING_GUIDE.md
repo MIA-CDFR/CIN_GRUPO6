@@ -32,7 +32,7 @@ Este guia explica como executar os **22 casos de teste** implementados e interpr
 
 ```bash
 # 1. Navegar até à pasta de código
-cd d:\GIT\MIA\CIN_GRUPO6\code
+cd code
 
 # 2. Instalar dependências (se não feito)
 poetry install
@@ -76,18 +76,18 @@ Ver [loaddata.py](app/utils/loaddata.py) para detalhes sobre download e cache.
 ### 1. Ver Lista de Todos os Casos
 
 ```bash
-python -m app.test_cases --list
+python -m app.test_cases
 ```
 
 **Saída Esperada:**
 ```
 🟢 TRIVIAL (2 casos)
-  TC-1.1: Livraria Bertrand → Torre dos Clérigos (3min, 0.3km)
-  TC-1.2: Estação S. Bento → Matosinhos (15min, 6km)
+  TC-1.1: Rua da Fábrica, 4050-246 → Torre dos Clérigos (3min, 0.3km)
+  TC-1.2: Estação S. Bento → Matosinhos (31min, 12.7km)
 
 🟡 BAIXA (2 casos)
-  TC-2.1: Mercado Bolhão → Ribeira (20min, 2.5km)
-  TC-2.2: Casa Música → Livraria Lello (25min, 3.5km)
+  TC-2.1: Mercado Bolhão → Ribeira (11.9min, 2.5km)
+  TC-2.2: Casa Música → Livraria Lello (15.4min, 3.5km)
 
 ... (demais grupos)
 
@@ -98,7 +98,8 @@ Total: 22 casos
 
 #### Via CLI
 ```bash
-python -m app.test_cases --case TC-3.1
+cd app
+python -m evaluation_framework
 ```
 
 **Saída Esperada:**
@@ -188,45 +189,48 @@ Rota 3 (Dijkstra apenas):
 ```python
 from app.test_cases import TestCaseEvaluator
 from app.services.algoritms.a_star import optimized_multi_objective_routing
-from app.services.graph import graph as G  # Grafo global pré-carregado
+from app.services.graph import GraphRoute
+from app.utils.time import time_to_seconds
 import time
 
 # Selecionar caso
 test_case = TestCaseEvaluator.get_by_id("TC-3.1")
 
 # Extrair origem, destino e hora
-origin = test_case['origem']  # ex: "Santa Apolónia"
-destination = test_case['destino']  # ex: "Francelos"
+graph = GraphRoute(
+    origem=test_case['origem'],
+    destino=test_case['destino']
+)
 start_time_str = test_case['start_time']  # ex: "09:00:00"
 
 # Converter hora para segundos
-hours, minutes, seconds = map(int, start_time_str.split(':'))
-start_time_sec = hours * 3600 + minutes * 60 + seconds
+start_time_sec = time_to_seconds(start_time_str)
 
 # Executar A*
-print(f"🔍 Testando A* de {origin} para {destination}...")
+print(f"🔍 Testando A* de {test_case['origem']} para {test_case['destino']}...")
 start = time.time()
 solutions_astar = optimized_multi_objective_routing(
-    G,
-    origin=origin,
-    destination=destination,
-    start_time_sec=start_time_sec
+    graph.G,
+    graph.origem_node_id,
+    graph.destino_node_id,
+    start_time_sec
 )
 elapsed = time.time() - start
 
 print(f"✓ A* encontrou {len(solutions_astar)} soluções em {elapsed:.2f}s")
 for i, sol in enumerate(solutions_astar, 1):
-    hours_arr = sol.arrival_sec // 3600
-    minutes_arr = (sol.arrival_sec % 3600) // 60
+    hours_arr = int(sol.arrival_sec // 3600)
+    minutes_arr = int((sol.arrival_sec % 3600) // 60)
     print(f"  Rota {i}: {sol.total_time//60}min, {sol.total_co2:.1f}g CO2, {sol.total_walk_km:.2f}km a pé")
-    print(f"           Chega às {hours_arr:02d}:{minutes_arr:02d}")
+    print(f"           Chega às {hours_arr}:{minutes_arr}")
 ```
 
 ### 3. Executar Todos os Testes (Batches)
 
 ```bash
 # Executar todos os 22 testes
-python -m app.test_cases
+cd app
+python -m evaluation_framework
 ```
 
 **Saída Esperada:**
@@ -235,7 +239,7 @@ python -m app.test_cases
 ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 🟢 TRIVIAL (2 casos)
-   TC-1.1: Livraria Bertrand → Torre dos Clérigos
+   TC-1.1: Rua da Fábrica, 4050-246 → Torre dos Clérigos
    TC-1.2: Estação S. Bento → Matosinhos
 
 🟡 BAIXA (2 casos)
@@ -267,23 +271,6 @@ python -m app.test_cases
    TC-6.3: Restrições Temporais
    TC-6.4: Casos Edge
 ```
-
-### 4. Executar por Grupo de Complexidade
-
-```bash
-# Apenas testes TRIVIAIS
-python -m app.test_cases --group trivial
-
-# Apenas testes de complexidade MÉDIA
-python -m app.test_cases --group medium
-
-# Apenas testes EXTREMOS
-python -m app.test_cases --group extreme
-```
-
-**Nota:** Use `python -m app.test_cases --help` para ver todas as opções disponíveis.
-
----
 
 ## Compreender os Resultados
 
@@ -361,9 +348,9 @@ Spread = (tempo_máximo - tempo_mínimo) / tempo_mediano
 ┌──────┬─────────────┬────────────────┬───────────────┬──────────┬─────────┐
 │ Caso │  Algoritmo  │ Tempo (segundos)│ Soluções (n°) │ CO₂ Médio│Cobertura│
 ├──────┼─────────────┼────────────────┼───────────────┼──────────┼─────────┤
-│TC-3.1│ A*          │ 3.2            │ 8             │ 95.5g    │  88.9%  │
-│      │ Dijkstra    │ 7.5            │ 9             │ 93.2g    │ 100.0%  │
-│      │ ACO         │ 12.3           │ 7             │ 98.1g    │  77.8%  │
+│TC-3.1│ A*          │ 0.28           │ 8             │ 95.5g    │  88.9%  │
+│      │ Dijkstra    │ 0.03           │ 9             │ 93.2g    │ 100.0%  │
+│      │ ACO         │ 3.11           │ 7             │ 98.1g    │  77.8%  │
 └──────┴─────────────┴────────────────┴───────────────┴──────────┴─────────┘
 ```
 
@@ -382,7 +369,7 @@ Spread = (tempo_máximo - tempo_mínimo) / tempo_mediano
 
 **Objetivo:** Validar correctness básico e casos simples.
 
-#### TC-1.1: Livraria Bertrand → Torre dos Clérigos
+#### TC-1.1: Rua da Fábrica, 4050-246 → Torre dos Clérigos
 
 ```
 Localização: Centro do Porto
@@ -398,40 +385,19 @@ Complexidade: Muito Baixa
 - ✅ Tempo < 1s para todos os algoritmos
 - ✅ Cobertura Pareto = 100%
 
-**Possíveis Problemas:**
-```
-❌ Erro de Módulo não encontrado
-   → Confirmar que está no diretório correto:
-       cd d:\GIT\MIA\CIN_GRUPO6\code
-   → Verificar instalação:
-       python -m app.test_cases
-
-❌ Nenhuma rota encontrada
-   → Grafo pode não estar carregado
-   → Verificar se feeds/ tem dados GTFS:
-       python -m app.utils.loaddata
-   → Testar com um caso simples (TC-1.1):
-       python -m app.test_cases --case TC-1.1
-
-❌ Tempo > 5s para A*
-   → Possível problema de performance
-   → Verificar métricas do sistema (RAM/CPU)
-   → Tentar com caso mais simples primeiro
-```
-
 #### TC-1.2: Estação S. Bento → Matosinhos
 
 ```
 Localização: Porto → Matosinhos
-Distância: 6km
-Tempo: ~15 minutos
+Distância: 12.7km
+Tempo: ~31 minutos
 Transporte: Metro linha amarela (direto)
 Complexidade: Muito Baixa
 ```
 
 **Resultado Esperado:**
 - ✅ 1-2 soluções (rota direta + alternativas mínimas)
-- ✅ Solução direta: ~15min, ~50g CO₂, ~0.1km a pé
+- ✅ Solução direta: ~31min, ~300g CO₂, ~1.5km a pé
 - ✅ Cobertura = 100%
 
 ---
@@ -445,14 +411,14 @@ Complexidade: Muito Baixa
 ```
 Localização: Centro Porto
 Distância: 2.5km
-Tempo: ~20 minutos
+Tempo: ~12 minutos
 Transferências: 1
 Hora: 14:00 (fora de pico)
 ```
 
 **Resultado Esperado:**
 - ✅ 3-5 soluções
-- ✅ Tempo: A* ~1s, Dijkstra ~2.5s, ACO ~4s
+- ✅ Tempo: A* ~0.4s, Dijkstra ~0.1s, ACO ~4s
 - ✅ Cobertura A*: ≥ 85%
 
 #### TC-2.2: Casa Música → Livraria Lello
@@ -460,7 +426,7 @@ Hora: 14:00 (fora de pico)
 ```
 Localização: Centro Porto
 Distância: 3.5km
-Tempo: ~25 minutos
+Tempo: ~15 minutos
 Transferências: 1-2
 Hora: 09:00 (hora de pico)
 ```
@@ -604,7 +570,7 @@ ModuleNotFoundError: No module named 'app'
 
 1. Verificar diretório de trabalho:
 ```bash
-cd d:\GIT\MIA\CIN_GRUPO6\code
+cd code
 pwd  # ou "cd" no Windows para confirmar
 ```
 
@@ -616,7 +582,7 @@ poetry shell
 
 3. Testar import simples:
 ```python
-cd d:\GIT\MIA\CIN_GRUPO6\code
+cd code
 python -c "from app.test_cases import TestCaseEvaluator; print('✓ OK')"
 ```
 
@@ -761,15 +727,15 @@ Os testes exibem relatórios formatados diretamente:
           TEST CASE: TC-3.1 (MÉDIA COMPLEXIDADE)
 ════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-📍 Origem: Santa Apolónia
+📍 Origem: Campanhã, Porto
 📍 Destino: Francelos
-⏱️  Tempo esperado: ~40min
+⏱️  Tempo esperado: ~120min
 
 RESULTADOS DO A*:
-  ✓ Tempo: 3.2s
-  📊 Soluções: 8
-  🏃 Mais rápida: 2340s (39min)
-  🌱 Mais eco: 125.5g CO2
+  ✓ Tempo: 0.82s
+  📊 Soluções: 3
+  🏃 Mais rápida: 7060s (117min)
+  🌱 Mais eco: 1425.7g CO2
 ```
 
 ### 2. Visualização de Rotas em Mapa
@@ -777,29 +743,39 @@ RESULTADOS DO A*:
 Use `map.py` para visualizar soluções graficamente:
 
 ```python
-from app.utils.map import visualize_multiple_routes
 from app.services.algoritms.a_star import optimized_multi_objective_routing
-from app.services.graph import graph as G
+from app.services.graph import GraphRoute
+from app.utils.time import time_to_seconds
+from app.utils.map import create_comparison_map_detailed
 
-# Calcular rotas
-solutions = optimized_multi_objective_routing(
-    G,
-    origin="Santa Apolónia",
-    destination="Francelos",
-    start_time_sec=32400
+# Extrair origem, destino e hora
+graph = GraphRoute(
+    origem="Campanhã, Porto",
+    destino="Francelos"
+)
+start_time_str = test_case['start_time']  # ex: "09:00:00"
+
+# Converter hora para segundos
+start_time_sec = time_to_seconds(start_time_str)
+
+# Executar A*
+print(f"🔍 Testando A* de {test_case['origem']} para {test_case['destino']}...")
+start = time.time()
+a_star_pareto_solutions = optimized_multi_objective_routing(
+    graph.G,
+    graph.origem_node_id,
+    graph.destino_node_id,
+    start_time_sec
 )
 
 # Visualizar em mapa interativo
-map_obj = visualize_multiple_routes(
-    solutions,
-    graph=G,
-    title="Teste TC-3.1: Fronteira Pareto"
+create_comparison_map_detailed(
+    a_star_pareto_solutions,
+    graph.G,
+    graph.G_walk,
+    graph.stops_df,
 )
-map_obj.save("test_tc_3_1.html")
-print("✓ Mapa salvo em: test_tc_3_1.html")
 ```
-
-Ver [map.py](app/utils/map.py) para mais detalhes sobre visualização.
 
 ---
 

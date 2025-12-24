@@ -1,28 +1,41 @@
-import uvicorn
+from app.services.graph import GraphRoute
+from app.services.algoritms.a_star import optimized_multi_objective_routing
+from app.services.algoritms.dijkstra import dijkstra_multi_objective
+from app.services.algoritms.aco import aco_optimized_routing
+from app.utils.time import time_to_seconds
 
-from fastapi import FastAPI
+# Carregar grafo
+# Rotas: Casa da Musica → Casino da Póvoa de Varzim, 4490-403
+graph = GraphRoute(
+    origem="Casa da Musica",
+    destino="Casino da Póvoa de Varzim, 4490-403",
+)
 
-from app.utils.geo import get_geocode_by_address
+START_TIME = '08:00:00'
 
-app = FastAPI()
+# Executar A*
+a_star_pareto_solutions = optimized_multi_objective_routing(
+    graph.G, graph.origem_node_id, graph.destino_node_id, time_to_seconds(START_TIME)
+)
 
+# Ver resultados
+for i, sol in enumerate(a_star_pareto_solutions, 1):
+    print(f"Rota {i}: {sol.total_time//60}min | {sol.total_co2:.0f}g CO₂ | {sol.total_walk_km:.1f}km caminhada")
 
-@app.get("/geocode")
-async def get_geocode(
-    address: str,
-    city: str | None = None,
-    country: str | None = None,
-):
-    if city:
-        geo_code = get_geocode_by_address(address=address, city=f"{city}, {country}")
-    else:    
-        geo_code = get_geocode_by_address(address=address)
+# Executar Dijkstra
+dijkstra_pareto_solutions = dijkstra_multi_objective(
+    graph.G, graph.origem_node_id, graph.destino_node_id, time_to_seconds(START_TIME)
+)
 
-    return {
-        "lat": geo_code.y,
-        "lon": geo_code.x
-    }
+# Ver resultados
+for i, sol in enumerate(dijkstra_pareto_solutions, 1):
+    print(f"Rota {i}: {sol.total_time//60}min | {sol.total_co2:.0f}g CO₂ | {sol.total_walk_km:.1f}km caminhada")
 
+# Executar ACO
+aco_pareto_solutions = aco_optimized_routing(
+    graph.G, graph.origem_node_id, graph.destino_node_id, time_to_seconds(START_TIME)
+)
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# Ver resultados
+for i, sol in enumerate(aco_pareto_solutions, 1):
+    print(f"Rota {i}: {sol.total_time//60}min | {sol.total_co2:.0f}g CO₂ | {sol.total_walk_km:.1f}km caminhada")

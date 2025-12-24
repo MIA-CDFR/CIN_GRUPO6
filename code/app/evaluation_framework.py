@@ -16,13 +16,13 @@ if module_path not in sys.path:
 import time
 import json
 from dataclasses import dataclass, asdict
-from typing import List, Dict, Tuple
+from typing import List, Dict
 from app.services.graph import GraphRoute
 from app.services.algoritms.a_star import optimized_multi_objective_routing
 from app.services.algoritms.dijkstra import dijkstra_multi_objective
 from app.services.algoritms.aco import aco_optimized_routing
 from app.utils.time import time_to_seconds
-from app.test_cases import TEST_CASES, TestCaseEvaluator
+from app.test_cases import TestCaseEvaluator
 
 
 @dataclass
@@ -60,17 +60,17 @@ class ComparativeEvaluator:
     """
     Framework para avaliação comparativa dos algoritmos
     """
-    
+
     def __init__(self):
         self.results: List[TestCaseResult] = []
-    
+
     def run_single_test(self, test_case: Dict, verbose: bool = True) -> TestCaseResult:
         """
         Executa um único caso de teste com os 3 algoritmos
         
         Returns: TestCaseResult com métricas de todos os algoritmos
         """
-        
+
         print(f"\n{'='*80}")
         print(f"Executando: {test_case['name']}")
         print(f"{'='*80}")
@@ -78,7 +78,7 @@ class ComparativeEvaluator:
         print(f"Destino: {test_case['destino']}")
         print(f"Hora: {test_case['start_time']}")
         print(f"Complexidade: {test_case['complexity']}\n")
-        
+
         try:
             # 1. Construir grafo
             print("[1/4] Construindo grafo multimodal...")
@@ -88,7 +88,7 @@ class ComparativeEvaluator:
             )
             start_sec = time_to_seconds(test_case["start_time"])
             print("✓ Grafo construído\n")
-            
+
             # 2. Executar A*
             print("[2/4] Executando A* Multi-Objetivo...")
             astar_metrics = self._run_algorithm(
@@ -99,7 +99,7 @@ class ComparativeEvaluator:
                 start_time=start_sec,
                 name="A* Multi-Objetivo"
             )
-            
+
             # 3. Executar Dijkstra
             print("[3/4] Executando Dijkstra Multi-Label...")
             dijkstra_metrics = self._run_algorithm(
@@ -110,7 +110,7 @@ class ComparativeEvaluator:
                 start_time=start_sec,
                 name="Dijkstra Multi-Label"
             )
-            
+
             # 4. Executar ACO
             print("[4/4] Executando ACO...")
             aco_metrics = self._run_algorithm(
@@ -121,12 +121,12 @@ class ComparativeEvaluator:
                 start_time=start_sec,
                 name="ACO"
             )
-            
+
             # Validação
             validation_passed = self._validate_results(
                 test_case, astar_metrics, dijkstra_metrics, aco_metrics
             )
-            
+
             # Criar resultado
             result = TestCaseResult(
                 test_case_name=test_case["name"],
@@ -139,25 +139,25 @@ class ComparativeEvaluator:
                 aco_metrics=aco_metrics,
                 validation_passed=validation_passed
             )
-            
+
             self.results.append(result)
             return result
-            
+
         except Exception as e:
             print(f"\n❌ ERRO ao executar caso de teste: {str(e)}")
             return None
-    
+
     def _run_algorithm(self, algorithm_func, graph, source, destination, 
                       start_time, name: str) -> AlgorithmMetrics:
         """
         Executa um algoritmo e coleta métricas
         """
         start_time_exec = time.time()
-        
+
         try:
             solutions = algorithm_func(graph, source, destination, start_time)
             elapsed = time.time() - start_time_exec
-            
+
             if not solutions:
                 print(f"  ⚠️  {name}: Sem soluções encontradas")
                 return AlgorithmMetrics(
@@ -173,12 +173,12 @@ class ComparativeEvaluator:
                     avg_walk_km=0.0,
                     solutions=[]
                 )
-            
+
             # Calcular estatísticas
             times = [s.total_time for s in solutions]
             co2s = [s.total_co2 for s in solutions]
             walks = [s.total_walk_km for s in solutions]
-            
+
             metrics = AlgorithmMetrics(
                 algorithm_name=name,
                 execution_time_sec=elapsed,
@@ -192,20 +192,20 @@ class ComparativeEvaluator:
                 avg_walk_km=sum(walks) / len(walks),
                 solutions=solutions
             )
-            
+
             print(f"  ✓ {name}:")
             print(f"    - Soluções: {len(solutions)}")
             print(f"    - Tempo exec: {elapsed:.2f}s")
             print(f"    - Melhor tempo: {min(times)/60:.1f} min")
             print(f"    - Melhor CO2: {min(co2s):.1f}g")
             print(f"    - Máx caminhada: {max(walks):.2f}km\n")
-            
+
             return metrics
-            
+
         except Exception as e:
             print(f"  ❌ ERRO em {name}: {str(e)}\n")
             return None
-    
+
     def _validate_results(self, test_case, astar, dijkstra, aco) -> bool:
         """
         Valida que as soluções cumprem os critérios esperados
@@ -215,7 +215,7 @@ class ComparativeEvaluator:
             return False
         
         return True
-    
+
     def print_comparison_table(self):
         """
         Imprime tabela comparativa de todos os resultados
@@ -223,46 +223,46 @@ class ComparativeEvaluator:
         if not self.results:
             print("Nenhum resultado para comparar.")
             return
-        
+
         print("\n" + "="*120)
         print("TABELA COMPARATIVA - RESUMO DE TODOS OS CASOS")
         print("="*120 + "\n")
-        
+
         print(f"{'Caso':<40} {'Complexidade':<12} {'A*':<18} {'Dijkstra':<18} {'ACO':<18}")
         print(f"{'':40} {'':12} {'Soluções|Tempo':<18} {'Soluções|Tempo':<18} {'Soluções|Tempo':<18}")
         print("-"*120)
-        
+
         for result in self.results:
             print(f"{result.test_case_name[:40]:<40} {result.test_case_complexity:<12} ", end="")
-            
+
             # A*
             if result.astar_metrics:
                 print(f"{result.astar_metrics.num_solutions}|{result.astar_metrics.execution_time_sec:.1f}s", end="".ljust(18))
             else:
                 print("ERROR".ljust(18), end="")
-            
+
             # Dijkstra
             if result.dijkstra_metrics:
                 print(f"{result.dijkstra_metrics.num_solutions}|{result.dijkstra_metrics.execution_time_sec:.1f}s", end="".ljust(18))
             else:
                 print("ERROR".ljust(18), end="")
-            
+
             # ACO
             if result.aco_metrics:
                 print(f"{result.aco_metrics.num_solutions}|{result.aco_metrics.execution_time_sec:.1f}s", end="".ljust(18))
             else:
                 print("ERROR".ljust(18), end="")
-            
+
             print()
-        
+
         print("\n" + "="*120)
-    
+
     def export_results_json(self, filename: str = "evaluation_results.json"):
         """
         Exporta resultados em JSON para análise posterior
         """
         results_dict = []
-        
+
         for result in self.results:
             result_data = {
                 "test_case_name": result.test_case_name,
@@ -275,12 +275,12 @@ class ComparativeEvaluator:
                 "aco": asdict(result.aco_metrics) if result.aco_metrics else None,
             }
             results_dict.append(result_data)
-        
+
         with open(filename, 'w') as f:
             json.dump(results_dict, f, indent=2, default=str)
-        
+
         print(f"\n✓ Resultados exportados para {filename}")
-    
+
     def print_detailed_analysis(self):
         """
         Análise detalhada de cada resultado
@@ -288,25 +288,25 @@ class ComparativeEvaluator:
         print("\n" + "="*120)
         print("ANÁLISE DETALHADA POR CASO DE TESTE")
         print("="*120 + "\n")
-        
+
         for result in self.results:
             print(f"\n{result.test_case_name}")
             print(f"Complexidade: {result.test_case_complexity.upper()}")
             print(f"Rota: {result.origin} → {result.destination}")
             print(f"Hora: {result.start_time}\n")
-            
+
             # A*
             if result.astar_metrics:
                 self._print_algorithm_details(result.astar_metrics)
-            
+
             # Dijkstra
             if result.dijkstra_metrics:
                 self._print_algorithm_details(result.dijkstra_metrics)
-            
+
             # ACO
             if result.aco_metrics:
                 self._print_algorithm_details(result.aco_metrics)
-            
+
             print("-"*120 + "\n")
     
     def _print_algorithm_details(self, metrics: AlgorithmMetrics):
@@ -325,16 +325,16 @@ class ComparativeEvaluator:
 if __name__ == "__main__":
     # Script de teste
     evaluator = ComparativeEvaluator()
-    
-    # Executar casos de teste selecionados (por complexidade)
-    print("Selecionando casos de teste...")
-    test_cases_to_run = TestCaseEvaluator.get_by_complexity("trivial")[:2]  # Começar com 2 triviais
-    
-    print(f"Executando {len(test_cases_to_run)} casos de teste...\n")
-    
-    for test_case in test_cases_to_run:
-        result = evaluator.run_single_test(test_case)
-    
+
+    for complexity in ["trivial", "low", "medium", "high", "special", "extreme"]:
+        print(f"Selecionando casos de teste {complexity}...")
+        test_cases_to_run = TestCaseEvaluator.get_by_complexity(complexity)
+
+        print(f"Executando {len(test_cases_to_run)} casos de teste {complexity}...\n")
+
+        for test_case in test_cases_to_run:
+            result = evaluator.run_single_test(test_case)
+
     # Gerar relatórios
     evaluator.print_comparison_table()
     evaluator.print_detailed_analysis()
