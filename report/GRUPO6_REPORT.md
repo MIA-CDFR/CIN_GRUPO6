@@ -2386,7 +2386,7 @@ python --version
 poetry show  # Lista todas as dependências
 ```
 
-Para mais detalhes, consulta [USER_GUIDE.md](code/USER_GUIDE.md).
+Para mais detalhes, consulta [USER_GUIDE.md](../code/USER_GUIDE.md).
 
 ---
 
@@ -2395,10 +2395,10 @@ Para mais detalhes, consulta [USER_GUIDE.md](code/USER_GUIDE.md).
 ## 📚 Documentação Complementar
 
 ### Ficheiros de Documentação
-- **[USER_GUIDE.md](code/USER_GUIDE.md)** - Guia prático para utilizadores (instalação, uso da API, algoritmos, exemplos)
-- **[TESTING_GUIDE.md](code/TESTING_GUIDE.md)** - Guia para executar e interpretar testes
-- **[code/TECHNICAL_DOCUMENTATION.md](code/TECHNICAL_DOCUMENTATION.md)** - Documentação técnica aprofundada
-- **[route-optimization-optimized.ipynb](code/notebook/route-optimization-optimized.ipynb)** - Notebook interativo
+- **[USER_GUIDE.md](../code/USER_GUIDE.md)** - Guia prático para utilizadores (instalação, uso da API, algoritmos, exemplos)
+- **[TESTING_GUIDE.md](../code/TESTING_GUIDE.md)** - Guia para executar e interpretar testes
+- **[code/TECHNICAL_DOCUMENTATION.md](../code/TECHNICAL_DOCUMENTATION.md)** - Documentação técnica aprofundada
+- **[route-optimization-optimized.ipynb](../code/notebook/route-optimization-optimized.ipynb)** - Notebook interativo
 
 ---
 
