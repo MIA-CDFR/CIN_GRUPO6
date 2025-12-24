@@ -32,7 +32,7 @@ Este guia explica como executar os **22 casos de teste** implementados e interpr
 
 ```bash
 # 1. Navegar até à pasta de código
-cd d:\GIT\MIA\CIN_GRUPO6\code
+cd CIN_GRUPO6\code
 
 # 2. Instalar dependências (se não feito)
 poetry install
@@ -402,7 +402,7 @@ Complexidade: Muito Baixa
 ```
 ❌ Erro de Módulo não encontrado
    → Confirmar que está no diretório correto:
-       cd d:\GIT\MIA\CIN_GRUPO6\code
+       cd \CIN_GRUPO6\code
    → Verificar instalação:
        python -m app.test_cases
 
@@ -604,7 +604,7 @@ ModuleNotFoundError: No module named 'app'
 
 1. Verificar diretório de trabalho:
 ```bash
-cd d:\GIT\MIA\CIN_GRUPO6\code
+cd \CIN_GRUPO6\code
 pwd  # ou "cd" no Windows para confirmar
 ```
 
@@ -616,7 +616,7 @@ poetry shell
 
 3. Testar import simples:
 ```python
-cd d:\GIT\MIA\CIN_GRUPO6\code
+cd \CIN_GRUPO6\code
 python -c "from app.test_cases import TestCaseEvaluator; print('✓ OK')"
 ```
 
@@ -645,8 +645,8 @@ ls feeds/gtfs_metro/stops.txt  # Validar que ficheiros existem
 3. Se ainda falta algo, descarregar manualmente:
 ```bash
 # Ver [USER_GUIDE.md](USER_GUIDE.md) Passo 3 para instruções
-# https://www.metro.pt/pt/empresa/open-data
-# https://www.stcp.pt/pt/empresa/desenvolvimento-aberto
+# https://opendata.porto.digital/dataset/5275c986-592c-43f5-8f87-aabbd4e4f3a4/resource/415bf8d5-4c18-40b3-9516-9d9187185ef9/download/gtfs_stcp.zip
+# https://www.metrodoporto.pt/metrodoporto/uploads/document/file/693/google_transit_08_09_2025.zip
 ```
 
 ---
@@ -832,3 +832,8 @@ Depois de executar os testes:
 - GTFS Metro: `feeds/gtfs_metro/` (paragens, horários, rotas)
 - GTFS STCP: `feeds/gtfs_stcp/` (autocarros Porto)
 
+---
+
+**Versão**: 1.1  
+**Última atualização**: Dezembro 2025  
+**Autores**: Grupo 6 - Computação Inspirada na Natureza (CIN) - Universidade do Minho - Escola de Engenharia
