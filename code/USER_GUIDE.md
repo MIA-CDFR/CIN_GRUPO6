@@ -170,22 +170,27 @@ DEBUG=False
 ### Opção 1: Script Python Simples
 
 ```python
-from app.services.graph import MultimodalGraph
+from app.services.graph import GraphRoute
 from app.services.algoritms.a_star import optimized_multi_objective_routing
-from app.services.graph import graph as G  # Grafo global pré-carregado
-import time
+from app.services.algoritms.dijkstra import dijkstra_multi_objective
+from app.services.algoritms.aco import aco_optimized_routing
+from app.utils.time import time_to_seconds
 
-# Hora de partida: 09:00:00 = 32400 segundos desde meia-noite
-start_time_sec = 9 * 3600  # 09:00:00
+# Carregar grafo
+# Rotas: Casa da Musica → Casino da Póvoa de Varzim, 4490-403
+graph = GraphRoute(
+    origem="Casa da Musica",
+    destino="Casino da Póvoa de Varzim, 4490-403",
+)
 
-# Origem e Destino
-origin = "Livraria Bertrand, Porto"  
-destination = "Torre dos Clérigos, Porto"
+START_TIME = '08:00:00'
 
 # 1. Executar A* (rápido)
 print("🔍 Executando A* (rápido)...")
 start = time.time()
-solutions = optimized_multi_objective_routing(G, origin, destination, start_time_sec)
+solutions = optimized_multi_objective_routing(
+    graph.G, graph.origem_node_id, graph.destino_node_id, time_to_seconds(START_TIME)
+)
 elapsed = time.time() - start
 
 print(f"\n✅ Encontradas {len(solutions)} rotas em {elapsed:.2f}s\n")
@@ -215,149 +220,43 @@ print(f"🚗 Menos caminhada: {walkless.total_walk_km:.2f}km")
 ### Exemplos de Rotas Reais no Porto
 
 ```python
-# Exemplo 1: Centro para Matosinhos
-routes_centro_mato = optimized_multi_objective_routing(
-    G,
-    origin="Livraria Bertrand, Porto",
-    destination="Museu de Serralves, Matosinhos",
-    start_time_sec=9*3600
+from app.services.graph import GraphRoute
+from app.services.algoritms.a_star import optimized_multi_objective_routing
+from app.services.algoritms.dijkstra import dijkstra_multi_objective
+from app.services.algoritms.aco import aco_optimized_routing
+from app.utils.time import time_to_seconds
+
+# Exemplo 1: Centro para Matosinhos com A*
+graph = GraphRoute(
+    origem="Rua de Santa Catarina",
+    destino="Museu de Serralves, Matosinhos",
 )
 
-# Exemplo 2: Ribeira para Arrábida
-routes_ribeira_arrabida = optimized_multi_objective_routing(
-    G,
-    origin="Ribeira, Porto",
-    destination="Ponte da Arrábida, Porto",
-    start_time_sec=10*3600
+a_star_pareto_solutions = optimized_multi_objective_routing(
+    graph.G, graph.origem_node_id, graph.destino_node_id, time_to_seconds(START_TIME)
 )
 
-# Exemplo 3: Estação de São Bento para Vila do Conde
-routes_sbento_vco = optimized_multi_objective_routing(
-    G,
-    origin="Estação de São Bento, Porto",
-    destination="Praia de Vila do Conde",
-    start_time_sec=8*3600
+# Exemplo 2: Ribeira para Arrábida com Dijkstra
+graph = GraphRoute(
+    origem="Ribeira, Porto",
+    destino="Ponte da Arrábida, Porto",
 )
+
+dijkstra_pareto_solutions = dijkstra_multi_objective(
+    graph.G, graph.origem_node_id, graph.destino_node_id, time_to_seconds(START_TIME)
+)
+
+# Exemplo 3: Estação de São Bento para Vila do Conde com ACO
+graph = GraphRoute(
+    origem="Estação de São Bento, Porto",
+    destino="Praia de Vila do Conde",
+)
+
+aco_pareto_solutions = aco_optimized_routing(
+    graph.G, graph.origem_node_id, graph.destino_node_id, time_to_seconds(START_TIME)
+)
+
 ```
-
-### Opção 2: Linha de Comando
-
-```bash
-# Ainda não implementado - ver Opção 3 (API REST)
-```
-
-### Opção 3: API REST
-
-```bash
-# Iniciar servidor
-python -m uvicorn app.main:app --reload
-
-# Num outro terminal, fazer pedido:
-curl -X POST http://localhost:8000/api/routes \
-  -H "Content-Type: application/json" \
-  -d '{
-    "origin": {"lat": 41.1579, "lon": -8.6291},
-    "destination": {"lat": 41.1625, "lon": -8.6362},
-    "start_time": "09:00:00",
-    "algorithm": "astar"
-  }'
-```
-
----
-
-## API REST
-
-### Endpoints Disponíveis
-
-#### `POST /api/routes`
-
-Calcular rotas entre dois pontos.
-
-**Request:**
-```json
-{
-  "origin": {
-    "lat": 41.1579,
-    "lon": -8.6291
-  },
-  "destination": {
-    "lat": 41.1625,
-    "lon": -8.6362
-  },
-  "start_time": "09:00:00",
-  "algorithm": "astar",
-  "max_walking_km": 2.0,
-  "max_wait_time_sec": 1800
-}
-```
-
-**Response:**
-```json
-{
-  "status": "success",
-  "algorithm": "astar",
-  "num_solutions": 3,
-  "solutions": [
-    {
-      "total_time": 1200,
-      "total_co2": 45.3,
-      "total_walk_km": 0.5,
-      "arrival_sec": 32400,
-      "path": [
-        {
-          "type": "walk",
-          "distance_km": 0.3,
-          "duration_sec": 180
-        },
-        {
-          "type": "bus",
-          "route_id": "13",
-          "trip_id": "trip_001",
-          "departure_time": "09:05:00",
-          "arrival_time": "09:15:00"
-        }
-      ]
-    }
-  ],
-  "computation_time_sec": 0.234
-}
-```
-
-**Parâmetros:**
-- `origin` (obrigatório): Coordenadas de origem {lat, lon}
-- `destination` (obrigatório): Coordenadas de destino {lat, lon}
-- `start_time` (obrigatório): Hora de partida (HH:MM:SS)
-- `algorithm` (opcional): "astar", "dijkstra" ou "aco" (padrão: "astar")
-- `max_walking_km` (opcional): Distância máxima de caminhada (padrão: 2.0 km)
-- `max_wait_time_sec` (opcional): Tempo máximo de espera (padrão: 1800 sec)
-
-#### `GET /api/health`
-
-Verificar estado do servidor.
-
-```bash
-curl http://localhost:8000/api/health
-```
-
-Response:
-```json
-{
-  "status": "healthy",
-  "graph_loaded": true,
-  "num_stops": 1250,
-  "num_routes": 45
-}
-```
-
-#### `GET /api/algorithms`
-
-Listar algoritmos disponíveis.
-
-```bash
-curl http://localhost:8000/api/algorithms
-```
-
----
 
 ## Algoritmos Disponíveis
 
@@ -365,7 +264,7 @@ curl http://localhost:8000/api/algorithms
 
 **Características:**
 - Heurístico: usa estimativa de distância para guiar a busca
-- Rápido: 2-5 segundos tipicamente
+- Rápido: poucos segundos tipicamente
 - Qualidade: ~85% da fronteira Pareto completa
 - Ideal para: tempo real, navegação interativa, produção
 
@@ -378,14 +277,17 @@ RELAXATION_FACTOR = 1.5          # Fator de relaxação para pruning
 
 **Uso:**
 ```python
+from app.services.graph import GraphRoute
 from app.services.algoritms.a_star import optimized_multi_objective_routing
+from app.utils.time import time_to_seconds
 
-# Executar A*
+graph = GraphRoute(
+    origem="Rua de Santa Catarina",
+    destino="Museu de Serralves, Matosinhos",
+)
+
 solutions = optimized_multi_objective_routing(
-    G, 
-    origin="Livraria Bertrand, Porto",
-    destination="Torre dos Clérigos, Porto",
-    start_time_sec=32400  # 09:00:00
+    graph.G, graph.origem_node_id, graph.destino_node_id, time_to_seconds(START_TIME)
 )
 
 print(f"Encontradas {len(solutions)} rotas Pareto-ótimas")
@@ -398,7 +300,7 @@ for sol in solutions:
 **Características:**
 - Exaustivo: testa todas as possibilidades
 - Completo: encontra 100% da fronteira Pareto-ótima (GARANTIDO)
-- Lento: 30-60 segundos tipicamente
+- Rápido: poucos segundos tipicamente
 - Ideal para: pesquisa offline, validação de qualidade, estudos académicos
 
 **Parâmetros:**
@@ -409,14 +311,17 @@ TIME_WINDOW_EPSILON = 60          # Tolerância (segundos)
 
 **Uso:**
 ```python
+from app.services.graph import GraphRoute
 from app.services.algoritms.dijkstra import dijkstra_multi_objective
+from app.utils.time import time_to_seconds
 
-# Executar Dijkstra (lento mas 100% ótimo)
+graph = GraphRoute(
+    origem="Rua de Santa Catarina",
+    destino="Museu de Serralves, Matosinhos",
+)
+
 solutions = dijkstra_multi_objective(
-    G,
-    source=origin_node_id,
-    destination=dest_node_id,
-    start_time_sec=32400
+    graph.G, graph.origem_node_id, graph.destino_node_id, time_to_seconds(START_TIME)
 )
 
 print(f"Garantia: 100% das soluções Pareto-ótimas")
@@ -444,16 +349,17 @@ num_iterations = 20      # Número de iterações (aumentar = melhor mas mais le
 
 **Uso:**
 ```python
+from app.services.graph import GraphRoute
 from app.services.algoritms.aco import aco_optimized_routing
+from app.utils.time import time_to_seconds
 
-# Executar ACO (criativo, pode encontrar rotas inesperadas)
+graph = GraphRoute(
+    origem="Rua de Santa Catarina",
+    destino="Museu de Serralves, Matosinhos",
+)
+
 solutions = aco_optimized_routing(
-    G,
-    source=origin_node_id,
-    destination=dest_node_id,
-    start_time_sec=32400,
-    n_ants=30,
-    n_iterations=20
+    graph.G, graph.origem_node_id, graph.destino_node_id, time_to_seconds(START_TIME)
 )
 
 print(f"Encontradas {len(solutions)} rotas (inclui alternativas criativas)")
@@ -465,7 +371,6 @@ for sol in solutions:
 
 | Critério | A* | Dijkstra | ACO |
 |----------|-----|----------|-----|
-| **Velocidade** | 2-5s ⚡⚡⚡ | 30-60s ⚡ | 3-10s ⚡⚡ |
 | **Qualidade Pareto** | ~85% ⭐⭐⭐ | 100% ⭐⭐⭐⭐⭐ | ~75% ⭐⭐⭐ |
 | **Soluções criativas** | ❌ | ❌ | ✅ |
 | **Determinístico** | ✅ | ✅ | ❌ |
@@ -481,81 +386,46 @@ for sol in solutions:
 Após calcular rotas, pode visualizá-las num mapa interativo:
 
 ```python
-from app.utils.map import visualize_route, visualize_multiple_routes
-from app.services.graph import graph as G
+from app.services.algoritms.a_star import optimized_multi_objective_routing
+from app.services.graph import GraphRoute
+from app.utils.time import time_to_seconds
+from app.utils.map import create_comparison_map_detailed
 
-# Visualizar Uma rota
-best_route = solutions[0]  # Pegar primeira solução
-map_obj = visualize_route(
-    best_route,
-    graph=G,
-    title="Rota Mais Rápida",
-    color="red"
+# Extrair origem, destino e hora
+graph = GraphRoute(
+    origem="Campanhã, Porto",
+    destino="Francelos"
 )
-map_obj.save("rota_rapida.html")  # Guardar como ficheiro HTML
+start_time_str = test_case['start_time']  # ex: "09:00:00"
 
-# Visualizar MÚLTIPLAS rotas (fronteira Pareto)
-map_obj = visualize_multiple_routes(
-    solutions,
-    graph=G,
-    title="Fronteira Pareto: Tempo vs CO2 vs Caminhada"
+# Converter hora para segundos
+start_time_sec = time_to_seconds(start_time_str)
+
+# Executar A*
+print(f"🔍 Testando A* de {test_case['origem']} para {test_case['destino']}...")
+start = time.time()
+a_star_pareto_solutions = optimized_multi_objective_routing(
+    graph.G,
+    graph.origem_node_id,
+    graph.destino_node_id,
+    start_time_sec
 )
-map_obj.save("pareto_frontier.html")
 
-# Abrir no browser
-import webbrowser
-webbrowser.open("pareto_frontier.html")
+# Visualizar em mapa interativo
+create_comparison_map_detailed(
+    a_star_pareto_solutions,
+    graph.G,
+    graph.G_walk,
+    graph.stops_df,
+)
 ```
 
 **Características da Visualização:**
-- 🚇 Paragens do Metro em **azul**
-- 🚌 Paragens do STCP em **verde**
-- 🚶 Secções de caminhada em **cinzento**
+- 🚇 Paragens do Metro
+- 🚌 Paragens do STCP
+- 🚶 Secções de caminhada
 - 🔴 Rotas com cores diferentes por legibilidade
 - ⏱️ Popup com tempo/CO2/distância ao clicar
-
-### Exemplo Completo: Calcular e Visualizar
-
-```python
-from app.services.algoritms.a_star import optimized_multi_objective_routing
-from app.services.graph import graph as G
-from app.utils.map import visualize_multiple_routes
-import webbrowser
-
-# 1. Calcular rotas (A*)
-print("🔍 Calculando rotas...")
-solutions = optimized_multi_objective_routing(
-    G,
-    origin="Livraria Bertrand, Porto",
-    destination="Torre dos Clérigos, Porto",
-    start_time_sec=32400
-)
-
-# 2. Encontrar extremos
-fastest = min(solutions, key=lambda s: s.total_time)
-greenest = min(solutions, key=lambda s: s.total_co2)
-walkless = min(solutions, key=lambda s: s.total_walk_km)
-
-print(f"\n📊 Resumo:")
-print(f"  🏃 Mais rápida: {fastest.total_time//60}min | {fastest.total_co2:.0f}g CO2")
-print(f"  🌱 Mais verde: {greenest.total_co2:.0f}g CO2 | {greenest.total_time//60}min")
-print(f"  🚶 Menos caminhada: {walkless.total_walk_km:.2f}km | {walkless.total_time//60}min")
-
-# 3. Visualizar
-print(f"\n🗺️  Gerando mapa interativo...")
-map_obj = visualize_multiple_routes(
-    solutions,
-    graph=G,
-    title=f"Fronteira Pareto: {len(solutions)} rotas ótimas"
-)
-map_obj.save("mapa_rotas.html")
-
-# 4. Abrir no browser
-print("✅ Mapa salvo em: mapa_rotas.html")
-webbrowser.open("mapa_rotas.html")
-```
-
----
 
 ## Interpretação de Resultados
 
@@ -647,87 +517,6 @@ Vê uma lista organizada por complexidade:
 - 🔵 **Special** (5 casos): Edge cases e validação de algoritmos
 - ⚫ **Extreme** (4 casos): Testes de robustez
 
-### Exemplos de Teste
-
-```python
-from app.test_cases import TestCaseEvaluator
-from app.services.algoritms.a_star import optimized_multi_objective_routing
-from app.services.graph import graph as G
-
-# Obter um caso específico
-test = TestCaseEvaluator.get_by_id("TC-2.1")
-print(f"Teste: {test['name']}")
-print(f"Origem: {test['origem']}")
-print(f"Destino: {test['destino']}")
-
-# Executar rota (A*)
-start_time_sec = 9 * 3600  # 09:00:00
-
-solutions = optimized_multi_objective_routing(
-    G,
-    origin=test['origem'],
-    destination=test['destino'],
-    start_time_sec=start_time_sec
-)
-
-# Validar que cumpre critérios
-if solutions:
-    is_valid, violations = TestCaseEvaluator.validate_solution(solutions[0], test)
-    
-    if is_valid:
-        print("✅ Solução válida!")
-    else:
-        for v in violations:
-            print(f"⚠️ {v}")
-else:
-    print("❌ Nenhuma rota encontrada")
-```
-
-### Comparação Entre Algoritmos
-
-```python
-from app.services.algoritms.a_star import optimized_multi_objective_routing as a_star_routing
-from app.services.algoritms.dijkstra import dijkstra_multi_objective
-from app.services.algoritms.aco import aco_optimized_routing
-from app.services.graph import graph as G
-import time
-
-origin = "Livraria Bertrand, Porto"
-destination = "Torre dos Clérigos, Porto"
-start_time_sec = 9 * 3600
-
-# Executar todos os três
-algorithms = {
-    "A*": ("A* (Heurístico)", a_star_routing),
-    "Dijkstra": ("Dijkstra (Exaustivo)", dijkstra_multi_objective),
-    "ACO": ("ACO (Estocástico)", aco_optimized_routing)
-}
-
-results = {}
-
-for algo_id, (algo_name, algo_func) in algorithms.items():
-    print(f"🔄 Executando {algo_name}...")
-    start = time.time()
-    
-    if algo_id == "A*":
-        solutions = algo_func(G, origin, destination, start_time_sec)
-    elif algo_id == "Dijkstra":
-        solutions = algo_func(G, origin_node_id, dest_node_id, start_time_sec)
-    else:  # ACO
-        solutions = algo_func(G, origin_node_id, dest_node_id, start_time_sec, n_ants=30, n_iterations=20)
-    
-    elapsed = time.time() - start
-    results[algo_id] = (solutions, elapsed)
-    
-    print(f"  ✅ {algo_name}:")
-    print(f"     ⏱️  Tempo: {elapsed:.3f}s")
-    print(f"     🗺️  Rotas: {len(solutions)}")
-    if solutions:
-        print(f"     🏃 Mais rápida: {min(s.total_time for s in solutions)//60}min")
-        print(f"     🌱 Mais eco: {min(s.total_co2 for s in solutions):.1f}g CO2")
-    print()
-```
-
 ---
 
 ## Resolução de Problemas
@@ -742,7 +531,7 @@ ModuleNotFoundError: No module named 'app'
 Certifique-se que está no diretório `code/`:
 
 ```bash
-cd CIN_GRUPO6/code
+cd code
 python -m app.test_cases
 ```
 

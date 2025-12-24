@@ -123,49 +123,15 @@ code/
 
 ## 🖥️ Como Executar
 
-### Opção 1: Casos de Teste (Validação)
+### Opção 1: Python Script
+
+Editar a origem e destino no ficheiro code/app/main.py
 
 ```bash
-python -m app.test_cases
+python -m app.main
 ```
 
-Executa 22 casos de teste organizados em 6 níveis de complexidade.
-
-### Opção 2: Script Python Simples
-
-```python
-from app.services.algoritms.a_star import optimized_multi_objective_routing
-from app.services.graph import graph as G  # Grafo global pré-carregado
-import time
-
-# Definir origem, destino e hora
-origin = "Livraria Bertrand, Porto"
-destination = "Torre dos Clérigos, Porto"
-start_time_sec = 9 * 3600  # 09:00:00 em segundos
-
-# Executar A* (rápido)
-print("🔍 Executando A*...")
-start = time.time()
-solutions = optimized_multi_objective_routing(
-    G,
-    origin=origin,
-    destination=destination,
-    start_time_sec=start_time_sec
-)
-elapsed = time.time() - start
-
-print(f"✅ Encontradas {len(solutions)} rotas em {elapsed:.2f}s\n")
-
-# Processar resultados
-for i, sol in enumerate(solutions, 1):
-    hours = sol.arrival_sec // 3600
-    minutes = (sol.arrival_sec % 3600) // 60
-    print(f"Rota {i}:")
-    print(f"  ⏱️  {sol.total_time//60}min | 💨 {sol.total_co2:.0f}g CO2 | 🚶 {sol.total_walk_km:.2f}km")
-    print(f"  Chega às {hours:02d}:{minutes:02d}\n")
-```
-
-### Opção 3: Jupyter Notebook
+### Opção 2: Jupyter Notebook
 
 ```bash
 jupyter notebook notebook/route-optimization-optimized.ipynb
@@ -220,7 +186,6 @@ jupyter notebook notebook/route-optimization-optimized.ipynb
 
 | Critério | A* | Dijkstra | ACO |
 |----------|-----|----------|-----|
-| **Velocidade** | 2-5s ⚡⚡⚡ | 30-60s ⚡ | 3-10s ⚡⚡ |
 | **Qualidade Pareto** | ~85% ⭐⭐⭐ | 100% ⭐⭐⭐⭐⭐ | ~75% ⭐⭐⭐ |
 | **Soluções Criativas** | ❌ | ❌ | ✅ Sim! |
 | **Determinístico** | ✅ | ✅ | ❌ (varia entre execuções) |
@@ -345,7 +310,7 @@ Ver [requirements.txt](requirements.txt) para versões exatas.
 
 ```bash
 # Certifique-se que está no diretório correto
-cd CIN_GRUPO6/code
+cd code
 python -m app.test_cases
 ```
 
