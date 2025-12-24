@@ -23,7 +23,7 @@ Sistema de otimização multimodal de rotas para a Área Metropolitana do Porto,
 ### 1. Clonar o Repositório
 
 ```bash
-git clone https://github.com/seu-usuario/CIN_GRUPO6.git
+git clone https://github.com/MIA-CDFR/CIN_GRUPO6.git
 cd CIN_GRUPO6/code
 ```
 
@@ -165,24 +165,7 @@ for i, sol in enumerate(solutions, 1):
     print(f"  Chega às {hours:02d}:{minutes:02d}\n")
 ```
 
-### Opção 3: API REST
-
-```bash
-# Terminal 1: Iniciar servidor
-python -m uvicorn app.main:app --reload
-
-# Terminal 2: Fazer pedido
-curl -X POST http://localhost:8000/api/routes \
-  -H "Content-Type: application/json" \
-  -d '{
-    "origin": {"lat": 41.1579, "lon": -8.6291},
-    "destination": {"lat": 41.1625, "lon": -8.6362},
-    "start_time": "09:00:00",
-    "algorithm": "astar"
-  }'
-```
-
-### Opção 4: Jupyter Notebook
+### Opção 3: Jupyter Notebook
 
 ```bash
 jupyter notebook notebook/route-optimization-optimized.ipynb
@@ -250,7 +233,7 @@ jupyter notebook notebook/route-optimization-optimized.ipynb
 
 ### Problema Multi-Objetivo
 
-O sistema minimiza **simultaneamente** três critérios:
+O sistema otimiza **simultaneamente** três critérios:
 
 1. **Tempo de Viagem** (segundos)
 2. **Emissões CO2** (gramas)
@@ -350,8 +333,6 @@ gtfs-kit (12.0.0+)     # GTFS parsing
 geopy (2.4.1+)         # Geocoding
 folium (0.20.0+)       # Mapas interativos
 matplotlib (3.10.8+)   # Visualização
-fastapi (0.100.0+)     # API REST
-uvicorn (0.24.0+)      # ASGI server
 ```
 
 Ver [requirements.txt](requirements.txt) para versões exatas.
@@ -389,42 +370,6 @@ python -m app.test_cases
 
 ---
 
-## 📝 Licença
-
-Este projeto é parte de avaliação académica da disciplina Conceitos de Informática II (CIN) da FEUP.
-
----
-
-## 👥 Autores
-
-Grupo 6 - CIN - FEUP - 2025
-
----
-
-## 📚 Referências Académicas
-
-### Algoritmos de Roteamento
-
-1. Hart, P. E., Nilsson, N. J., & Raphael, B. (1968). A formal basis for the heuristic determination of minimum cost paths. *IEEE Transactions on Systems Science and Cybernetics*, 4(2), 100-107.
-
-2. Dijkstra, E. W. (1959). A note on two problems in connexion with graphs. *Numerische Mathematik*, 1(1), 269-271.
-
-3. Dorigo, M., & Stützle, T. (2004). *Ant Colony Optimization*. MIT Press.
-
-### Roteamento Multimodal
-
-4. Pyrga, E., Schulz, F., Wagner, D., & Zaroliagis, C. (2008). Efficient models for timetable information in public transportation systems. *ACM Journal of Experimental Algorithmics*, 12, 1-39.
-
-5. Müller-Hannemann, M., & Schnee, M. (2004). Finding all attractive train connections by multi-criteria Pareto search. *Transportation Research Record*, 1915(1), 246-263.
-
-### Emissões e Sustentabilidade
-
-6. McKinnon, A. C., & Piecyk, M. (2009). Measurement of CO2 emissions from road freight transport: A comparative study of available tools. *Energy Policy*, 37(10), 3657-3665.
-
-7. European Environment Agency (2022). *Greenhouse gas emissions from transport in Europe*. EEA Report No. 13/2022.
-
----
-
-**Versão**: 1.0  
+**Versão**: 1.1  
 **Última atualização**: Dezembro 2025  
-**Status**: Produção
+**Autores**: Grupo 6 - Computação Inspirada na Natureza (CIN) - Universidade do Minho - Escola de Engenharia

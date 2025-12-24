@@ -42,7 +42,7 @@ O sistema retorna uma **Fronteira de Pareto** - um conjunto de rotas onde nenhum
 ### ✨ Características Principais
 
 ✅ **Otimização Multi-Objetivo**: Três critérios simultâneos com fronteira Pareto rigorosa  
-✅ **Dados Reais**: Integração com GTFS (Metro do Porto, STCP) e OpenStreetMap  
+✅ **Dados Reais**: Integração com GTFS (Metro do Porto, STCP) e OSMnx  
 ✅ **3 Algoritmos Avançados**: A* Heurístico, Dijkstra Exaustivo, ACO Estocástico  
 ✅ **Análise Geográfica**: Ruas reais (OSMnx), não linhas retas  
 ✅ **22 Casos de Teste**: Cobertura de trivial a extremo  
@@ -2306,28 +2306,7 @@ mapa = create_comparison_map_detailed(solutions, grafo, stops_df)
   - Implementações otimizadas de algoritmos clássicos
   - Referência: Pedregosa, F., et al. (2011). "Scikit-learn: Machine Learning in Python"
 
-### 8. Interface Web e API
-
-#### **FastAPI (indireto via uvicorn)** ✅
-- **Função:** Framework para criar API REST
-- **Aplicações:**
-  - Endpoint `/geocode` para conversão endereço ↔ coordenadas
-  - Interface para consumo do motor de roteamento
-- **Justificação:**
-  - Framework moderno e de alta performance
-  - Validação automática de parâmetros (Pydantic)
-  - Documentação automática (OpenAPI/Swagger)
-  - Referência: https://fastapi.tiangolo.com/
-
-#### **Uvicorn (v0.30.0+)** ✅
-- **Função:** Servidor ASGI para rodar FastAPI
-- **Justificação:**
-  - Implementação ASGI mais rápida em Python
-  - Suporta concorrência e async/await
-  - Baixo overhead de memória
-  - Referência: https://www.uvicorn.org/
-
-### 9. Análise e Exploração Interativa
+### 8. Análise e Exploração Interativa
 
 #### **IPython Kernel (v7.1.0+)** ✅
 - **Função:** Suporte para Jupyter Notebooks
@@ -2521,5 +2500,6 @@ Os dados GTFS e mapas utilizados estão sob as seguintes licenças:
 
 ---
 
-**Versão:** 1.0
-**Última atualização:** Dezembro 2025
+**Versão**: 1.15 
+**Última atualização**: Dezembro 2025  
+**Autores**: Grupo 6 - Computação Inspirada na Natureza (CIN) - Universidade do Minho - Escola de Engenharia

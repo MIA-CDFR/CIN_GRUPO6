@@ -884,4 +884,4 @@ Para questões ou problemas:
 
 **Versão**: 1.1  
 **Última atualização**: Dezembro 2025  
-**Autores**: Grupo 6 - CIN - FEUP
+**Autores**: Grupo 6 - Computação Inspirada na Natureza (CIN) - Universidade do Minho - Escola de Engenharia
