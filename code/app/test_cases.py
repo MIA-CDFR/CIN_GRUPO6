@@ -94,7 +94,7 @@ TEST_CASES = [
     {
         "id": "TC-3.1",
         "name": "Distância Longa com 2 Transferências",
-        "origem": "Estação de Santa Apolónia, Porto",
+        "origem": "Campanhã, Porto",
         "destino": "Francelos, Vila Nova de Gaia",
         "start_time": "11:00:00",
         "complexity": "medium",
@@ -153,11 +153,11 @@ TEST_CASES = [
         "id": "TC-4.1",
         "name": "Distância Longa com Múltiplas Alternativas",
         "origem": "Maia, Porto",
-        "destino": "Espinho, Aveiro",
+        "destino": "Santo Ovídio, Vila Nova de Gaia",
         "start_time": "07:00:00",
         "complexity": "high",
-        "expected_distance_km": 35.0,
-        "expected_duration_sec": 3600,
+        "expected_distance_km": 20.0,
+        "expected_duration_sec": 2700,
         "description": "Rota longa dentro da área metropolitana com muitas combinações possíveis.",
         "metrics": {
             "num_solutions_expected": "6-12",
@@ -172,7 +172,7 @@ TEST_CASES = [
         "id": "TC-4.2",
         "name": "Rede Complexa com Muitos Hubs",
         "origem": "Campanhã, Porto",
-        "destino": "Gaia Centre, Vila Nova de Gaia",
+        "destino": "Gaia Centro, Vila Nova de Gaia",
         "start_time": "17:30:00",
         "complexity": "high",
         "expected_distance_km": 8.0,
@@ -191,7 +191,7 @@ TEST_CASES = [
         "id": "TC-4.3",
         "name": "Caso Extremo: Máxima Dissimilaridade entre Algoritmos",
         "origem": "Parque da Cidade, Porto",
-        "destino": "Vilar do Conde, Porto",
+        "destino": "Vila do Conde, Porto",
         "start_time": "06:00:00",
         "complexity": "high",
         "expected_distance_km": 18.0,
@@ -264,7 +264,7 @@ TEST_CASES = [
         "id": "TC-5.2",
         "name": "Teste de Diversidade Pareto",
         "origem": "Bolhão, Porto",
-        "destino": "Gaia Centre, Vila Nova de Gaia",
+        "destino": "Gaia Centro, Vila Nova de Gaia",
         "start_time": "10:00:00",
         "complexity": "special",
         "expected_distance_km": 7.0,
@@ -564,7 +564,7 @@ class TestCaseEvaluator:
             "by_complexity": {},
             "avg_distance_km": 0,
             "avg_duration_sec": 0,
-            "metropolitan_area": "Porto Metropolitan Area (Porto, Vila Nova de Gaia, Maia, Matosinhos, Espinho, Vilar do Conde)"
+            "metropolitan_area": "Porto Metropolitan Area (Porto, Vila Nova de Gaia, Maia, Matosinhos, Espinho, Vila do Conde)"
         }
         
         total_dist = 0

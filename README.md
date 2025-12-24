@@ -1,6 +1,6 @@
 # 🚌 Sistema de Roteamento Multimodal para a Área Metropolitana do Porto
 
-**Projeto CIN - Grupo 6**
+**Projeto Computação Inspirada na Natureza (CIN) - Universidade do Minho @2025 - Grupo 6**
 
 | Elemento | Informação |
 |----------|-----------|
@@ -35,7 +35,7 @@ Este repositório implementa um **motor de roteamento multimodal** que otimiza t
 
 - **Tempo de viagem** (minimizar)
 - **Emissões de CO₂** (minimizar)
-- **Distância a pé** (minimizar)
+- **Exercício físico** (maximizar)
 
 O sistema retorna uma **Fronteira de Pareto** - um conjunto de rotas onde nenhuma é superior em todos os critérios simultaneamente, permitindo ao utilizador escolher baseado nos seus valores pessoais.
 
@@ -50,87 +50,126 @@ O sistema retorna uma **Fronteira de Pareto** - um conjunto de rotas onde nenhum
 
 ---
 
+## 🚀 Quick Start
+
+### 1️⃣ Instalar
+
+```bash
+cd code/
+pip install -r requirements.txt
+# OU com Poetry (recomendado)
+poetry install && poetry shell
+```
+
+### 2️⃣ Executar um Teste
+
+```bash
+python -m app.test_cases
+```
+
+22 casos executados com os 3 algoritmos comparados. ✅
+
+### 3️⃣ Exemplo Rápido em Python
+
+```python
+from app.services.graph import GraphRoute
+from app.services.algoritms.a_star import optimized_multi_objective_routing
+
+# Carregar grafo
+graph = GraphRoute(
+    origem="Casa da Musica",
+    destino="Casino da Póvoa de Varzim, 4490-403",
+)
+
+# Rotas: Casa da Musica → Casino da Póvoa de Varzim, 4490-403
+origin = "Casa da Musica"
+destination = "Casino da Póvoa de Varzim, 4490-403"
+START_TIME = '08:00:00'
+
+# Executar A*
+a_star_pareto_solutions = optimized_multi_objective_routing(
+    graph.G, graph.origem_node_id, graph.destino_node_id, start_sec
+)
+
+# Ver resultados
+for i, sol in enumerate(a_star_pareto_solutions, 1):
+    print(f"Rota {i}: {sol.total_time//60}min | {sol.total_co2:.0f}g CO₂ | {sol.total_walk_km:.1f}km caminhada")
+```
+
+---
+
 <a id="estrutura-de-ficheiros"></a>
 
 ## 📁 Estrutura de Ficheiros
 
 ```
 CIN_GRUPO6/
-├── README.md                              # Este ficheiro (documentação principal)
-├── 
-└── code/                                  # Código-fonte do projeto
-    ├── TECHNICAL_DOCUMENTATION.md         # Documentação técnica
-    ├── USER_GUIDE.md                      # Guia de uso prático
-    ├── TESTING_GUIDE.md                   # Guia de testes
-    ├── requirements.txt                   # Dependências Python
-    ├── pyproject.toml                     # Configuração Poetry
+├── README.md                              # 📄 Este ficheiro (documentação principal)
+│
+└── code/                                  # 📦 Código-fonte do projeto
+    ├── USER_GUIDE.md                      # 📖 Guia de uso prático
+    ├── TECHNICAL_DOCUMENTATION.md         # 🔧 Documentação técnica aprofundada
+    ├── TESTING_GUIDE.md                   # 🧪 Guia de testes
+    ├── pyproject.toml                     # ⚙️ Configuração Poetry
+    ├── requirements.txt                   # 📋 Dependências Python
     │
-    ├── app/                               # Código principal da aplicação
-    │   ├── main.py                        # Entrada API REST (FastAPI)
-    │   ├── test_cases.py                  # 22 casos de teste para validação
+    ├── app/                               # 🚀 Aplicação principal
+    │   ├── main.py                        # 🔌 API REST (FastAPI)
+    │   ├── test_cases.py                  # 🧪 22 casos de teste
     │   │
-    │   ├── models/                        # Modelos de dados
+    │   ├── models/                        # 📊 Modelos de dados
     │   │   └── __init__.py
     │   │
-    │   ├── services/                      # Lógica de negócio e algoritmos
-    │   │   ├── graph.py                   # Construção da rede multimodal
-    │   │   ├── solution.py                # Classe Solution (3 atributos)
+    │   ├── services/                      # ⚙️ Lógica e algoritmos
+    │   │   ├── graph.py                   # 🌐 Grafo multimodal
+    │   │   ├── solution.py                # 🎯 Classe Solution (3 critérios)
     │   │   │
-    │   │   └── algoritms/                 # Implementações dos 3 algoritmos
-    │   │       ├── a_star.py              # A* Multi-Objetivo (heurístico)
-    │   │       ├── dijkstra.py            # Dijkstra Multi-Label (exaustivo)
-    │   │       └── aco.py                 # ACO (estocástico bioinspirado)
+    │   │   └── algoritms/                 # 🔍 3 Algoritmos de otimização
+    │   │       ├── a_star.py              # ⚡ A* (heurístico, rápido)
+    │   │       ├── dijkstra.py            # 🔍 Dijkstra (exaustivo, ótimo)
+    │   │       └── aco.py                 # 🐜 ACO (bioinspirado, criativo)
     │   │
-    │   └── utils/                         # Utilitários e funções auxiliares
-    │       ├── co2.py                     # Cálculo de emissões CO₂ por modo
-    │       ├── feed.py                    # Processamento de dados GTFS
-    │       ├── geo.py                     # Operações geográficas (OSM)
-    │       ├── route.py                   # Cálculo de custos de rotas
-    │       └── time.py                    # Manipulação e formatação temporal
+    │   └── utils/                         # 🛠️ Funções auxiliares
+    │       ├── co2.py                     # 💨 Cálculo de emissões CO₂
+    │       ├── feed.py                    # 📥 Processamento GTFS
+    │       ├── geo.py                     # 🗺️ Operações geográficas
+    │       ├── route.py                   # 📍 Custos de rotas
+    │       ├── time.py                    # ⏰ Manipulação temporal
+    │       ├── loaddata.py                # 💾 Cache e pré-carregamento
+    │       └── map.py                     # 🗺️ Visualização de mapas
     │
-    ├── feeds/                             # Dados GTFS reais (publicamente disponíveis)
-    │   ├── gtfs_metro/                    # Metro do Porto
-    │   │   ├── agency.txt
-    │   │   ├── calendar.txt
-    │   │   ├── calendar_dates.txt
-    │   │   ├── fare_attributes.txt
-    │   │   ├── fare_rules.txt
-    │   │   ├── routes.txt
-    │   │   ├── shapes.txt
-    │   │   ├── stop_times.txt
-    │   │   ├── stops.txt
-    │   │   └── transfers.txt
-    │   │   └── trips.txt
+    ├── feeds/                             # 📊 Dados GTFS (públicos)
+    │   ├── gtfs_metro/                    # 🚇 Metro do Porto
+    │   │   ├── stops.txt, stop_times.txt, routes.txt
+    │   │   ├── calendar.txt, shapes.txt, trips.txt
+    │   │   └── ... (ficheiros GTFS padrão)
     │   │
-    │   └── gtfs_stcp/                     # STCP (Transportes Urbanos Porto)
-    │       ├── agency.txt
-    │       ├── calendar.txt
-    │       ├── calendar_dates.txt
-    │       ├── routes.txt
-    │       ├── shapes.txt
-    │       ├── stop_times.txt
-    │       ├── stops.txt
-    │       └── trips.txt
+    │   └── gtfs_stcp/                     # 🚌 STCP (Autocarros)
+    │       ├── stops.txt, stop_times.txt, routes.txt
+    │       └── ... (ficheiros GTFS padrão)
     │
-    └── notebook/                          # Análise exploratória Jupyter
+    └── notebook/                          # 📓 Análise Jupyter
         ├── route-optimization-optimized.ipynb
-        └── cache/                         # Cache de dados para reutilização
-            └── *.json                     # Dados cacheados (geometrias, etc)
+        └── cache/                         # 💾 Cache de dados
+            └── *.json
 ```
 
 ### Descrição dos Ficheiros Principais
 
 | Ficheiro | Descrição | Responsabilidade |
 |----------|-----------|-----------------|
-| [main.py](code/app/main.py) | Servidor FastAPI | Exposição de API REST para roteamento |
-| [test_cases.py](code/app/test_cases.py) | Suite de testes | 22 casos de teste (trivial a extremo) |
-| [solution.py](code/app/services/solution.py) | Classe Solution | Representação de rotas com 3 critérios |
-| [a_star.py](code/app/services/algoritms/a_star.py) | Algoritmo A* | Busca heurística rápida (2-5s) |
-| [dijkstra.py](code/app/services/algoritms/dijkstra.py) | Algoritmo Dijkstra | Busca exaustiva garantindo ótimo (30-60s) |
-| [aco.py](code/app/services/algoritms/aco.py) | Algoritmo ACO | Otimização bioinspirada criativa (3-10s) |
-| [graph.py](code/app/services/graph.py) | Grafo multimodal | Integração GTFS + OpenStreetMap |
-| [feed.py](code/app/utils/feed.py) | Processamento GTFS | Leitura e validação de dados GTFS |
-| [geo.py](code/app/utils/geo.py) | Geolocalização | Operações com coordenadas e distâncias |
+| **main.py** | 🔌 API REST | Exposição de endpoints FastAPI |
+| **test_cases.py** | 🧪 Suite de testes | 22 casos de teste (trivial → extremo) |
+| **solution.py** | 🎯 Classe Solution | Rotas com 3 critérios (tempo, CO₂, caminhada) |
+| **a_star.py** | ⚡ Algoritmo A* | Heurístico: rápido (2-5s), ~85% Pareto |
+| **dijkstra.py** | 🔍 Dijkstra | Exaustivo: lento (30-60s), 100% Pareto |
+| **aco.py** | 🐜 ACO | Bioinspirado: criativo (3-10s), alternativas |
+| **graph.py** | 🌐 Grafo multimodal | GTFS + OpenStreetMap integrados |
+| **feed.py** | 📥 Processamento GTFS | Leitura, indexação de horários |
+| **geo.py** | 🗺️ Geolocalização | Distâncias, coordenadas, OSM |
+| **route.py** | 📍 Custos de rotas | Tempo, CO₂, caminhada por aresta |
+| **loaddata.py** | 💾 Cache de dados | Pré-carregamento e serialização |
+| **map.py** | 🗺️ Visualização | Renderização de rotas em mapas Folium |
 
 ---
 
@@ -140,14 +179,14 @@ CIN_GRUPO6/
 
 Esta secção descreve as principais decisões arquitectónicas e técnicas tomadas durante o desenvolvimento, com justificação teórica.
 
-### 1. Otimização Multi-Objetivo vs. Mono-Objetivo
+### 1. Otimização Multi-Objetivo
 
 **Decisão:** Implementar otimização para **3 critérios simultâneos** (tempo, CO₂, caminhada) em vez de otimizar apenas um objetivo.
 
 **Justificação:**
-- **Realismo:** Utilizadores reais têm preferências conflitantes - alguns priorizam velocidade, outros sustentabilidade [1]
-- **Pareto Frontier:** Retornar o conjunto de soluções Pareto-ótimas (não-dominadas) permite ao utilizador escolher [2]
-- **Teoria de Decisão:** Problema de "many-objective optimization" requer técnicas especializadas [3]
+- **Realismo:** Utilizadores reais têm preferências conflitantes - alguns priorizam velocidade, outros sustentabilidade
+- **Pareto Frontier:** Retornar o conjunto de soluções Pareto-ótimas (não-dominadas) permite ao utilizador escolher
+- **Teoria de Decisão:** Problema de "many-objective optimization" requer técnicas especializadas
 - **Inovação:** A maioria dos sistemas usa apenas tempo; CO₂ + caminhada são diferenciadoras
 
 **Implementação:**
@@ -161,7 +200,7 @@ class Solution:
     def __init__(self, total_time, total_co2, total_walk_km, arrival_sec, path):
         self.total_time = total_time          # Segundos de viagem (minimizar ⬇️)
         self.total_co2 = total_co2            # Gramas de CO2 (minimizar ⬇️)
-        self.total_walk_km = total_walk_km    # Km a pé (minimizar ⬇️)
+        self.total_walk_km = total_walk_km    # Km a pé (maximizar ⬆️)
 ```
 
 A aplicação **não escolhe "a melhor" rota**, mas retorna **múltiplas soluções válidas** que equilibram estes critérios diferentemente, permitindo ao utilizador escolher baseado nos seus valores pessoais.
@@ -1037,7 +1076,7 @@ Vantagem: Descobriu rota via Livraria que A* nunca vê!
 ┌─────────────────────────────────────────────────┐
 │               DIJKSTRA EXAUSTIVO                │
 ├─────────────────────────────────────────────────┤
-│ Tempo:       47.3 segundos ⏳ LENTO             │
+│ Tempo:       47.3 segundos ⏳ LENTO            │
 │ Soluções:    6 rotas Pareto (TODAS ótimas)     │
 │             ├─ Rota 1: 28min, 450g, 1.5km      │
 │             ├─ Rota 2: 32min, 320g, 3.2km      │
@@ -1066,21 +1105,21 @@ Vantagem: Descobriu rota via Livraria que A* nunca vê!
 ```
 
 **Insights:**
-- A* é 15x mais rápido que Dijkstra, perdendo 2 soluções
+- A* é mais rápido que Dijkstra, perdendo 2 soluções
 - Dijkstra encontrou 2 soluções intermédias que A* perdeu
 - ACO encontrou 1 rota criativa (35min, mas muito verde = 280g)
 - **Conclusão:** Usar **A* para utilizador interativo**, **Dijkstra para validação**, **ACO para exploração**
 
 ---
 
-### 3. Grafo Multimodal com Integração GTFS + OpenStreetMap
+### 3. Grafo Multimodal com Integração GTFS + OSMnx
 
 **Decisão:** Integrar **dois grafos diferentes** em um único grafo híbrido.
 
 **Justificação:**
 - **GTFS (Transportes Públicos):** Nós = paragens, arestas = viagens (com horários)
-- **OpenStreetMap (Ruas):** Nós = interseções, arestas = ruas (sem horários)
-- **Sincronização Temporal:** Nós de transferência com restrições de espera (min-transfer-time) [7]
+- **OSMnx (Ruas):** Nós = interseções, arestas = ruas (sem horários)
+- **Sincronização Temporal:** Nós de transferência com restrições de espera (min-transfer-time)
 
 **Desafios Resolvidos:**
 1. **Matching paragens ↔ ruas:** Usar OSMnx para encontrar nó mais próximo (< 100m)
@@ -1090,7 +1129,7 @@ Vantagem: Descobriu rota via Livraria que A* nunca vê!
 **Implementação:**
 ```python
 # Pseudo-código
-G = MultiGraph()
+G = GraphRoute()
 # Adicionar nós GTFS
 for paragem in gtfs.stops:
     G.add_node(paragem.stop_id, type='transit_stop', coords=...)
@@ -1115,16 +1154,16 @@ for paragem in gtfs.stops:
 **Decisão:** Usar dados **GTFS reais e públicos** em vez de dados sintéticos.
 
 **Justificação:**
-- **Validação Realista:** Testar em dados reais detecta problemas (horários raros, transferências complexas) [8]
+- **Validação Realista:** Testar em dados reais detecta problemas (horários raros, transferências complexas)
 - **Reprodutibilidade:** Dados GTFS são versionados e públicos
 - **Aplicabilidade:** Sistema pronto para usar em produção
-- **Padrão Industrial:** GTFS é standard da Google para transportes [9]
+- **Padrão Industrial:** GTFS é standard da Google para transportes
 
 **Fontes:**
 - Metro do Porto: 6 linhas, ~95 paragens, data/hora precisa
 - STCP: 100+ linhas, ~1000 paragens de autocarro
 
-**Nota:** Dados de 2024; atualizar se houver mudanças operacionais
+**Nota:** Dados de 2025; atualizar se houver mudanças operacionais
 
 ---
 
@@ -1133,7 +1172,7 @@ for paragem in gtfs.stops:
 **Decisão:** Usar **distância euclidiana / velocidade máxima** como heurística admissível.
 
 **Justificação Teórica:**
-- Uma heurística $h$ é admissível se $h(n) \leq h^*(n)$ (não sobrestima o custo real) [10]
+- Uma heurística $h$ é admissível se $h(n) \leq h^*(n)$ (não sobrestima o custo real)
 - Para múltiplos objetivos, cada heurística deve ser admissível independentemente
 - Distância euclidiana / velocidade_máxima garante limite inferior no tempo
 
@@ -1142,7 +1181,7 @@ $$h(n) = \frac{\text{distância euclidiana}(n, \text{destino})}{\text{velocidade
 
 Onde velocidade máxima = max(velocidade metro, velocidade autocarro, velocidade a pé)
 
-**Propriedade:** Esta heurística é **consistente** (satisfaz desigualdade triangular), logo A* é ótimo em grafos de custo não-negativo [11]
+**Propriedade:** Esta heurística é **consistente** (satisfaz desigualdade triangular), logo A* é ótimo em grafos de custo não-negativo
 
 ---
 
@@ -1179,7 +1218,7 @@ Função add_solution_with_diversity(solution, frontier):
 **Decisão:** Calcular distâncias seguindo **ruas reais** via OpenStreetMap em vez de linhas retas.
 
 **Justificação:**
-- **Realismo:** Distância euclidiana pode ser 30-50% menor que distância real [12]
+- **Realismo:** Distância euclidiana pode ser 30-50% menor que distância real
 - **Routing:** Um utilizador a pé não pode atravessar edifícios; precisa de ruas
 - **Integração:** OSMnx fornece acesso fácil ao grafo de ruas
 
@@ -1195,8 +1234,8 @@ Função add_solution_with_diversity(solution, frontier):
 **Decisão:** Atribuir **emisões específicas** para cada modo (metro, autocarro, a pé).
 
 **Justificação:**
-- **Sustentabilidade:** CO₂ é proxy para impacto ambiental [13]
-- **Realismo:** Metro tem ~70g CO₂/passageiro/km; autocarro ~100g; a pé ~0g [14]
+- **Sustentabilidade:** CO₂ é proxy para impacto ambiental
+- **Realismo:** Metro tem ~70g CO₂/passageiro/km; autocarro ~100g; a pé ~0g
 - **Comparação:** Permite trade-off quantitativo entre velocidade e sustentabilidade
 
 **Fórmula:**
@@ -1205,10 +1244,9 @@ $$\text{CO2}(rota) = \sum_{\text{segmento}} (\text{distância} \times \text{emis
 **Valores por modo:**
 | Modo | Emissão (g/km) | Fonte |
 |------|---|---|
-| Metro | 70 | LIPASTO/VTT [15] |
+| Metro | 70 | LIPASTO/VTT |
 | Autocarro | 100 | LIPASTO/VTT |
 | Caminhada | 0 | N/A |
-| Bicicleta (futuro) | 0 | N/A |
 
 ---
 
@@ -1217,7 +1255,7 @@ $$\text{CO2}(rota) = \sum_{\text{segmento}} (\text{distância} \times \text{emis
 **Decisão:** Encapsular em **classes Python orientadas a objetos** em vez de dicionários/tuples.
 
 **Justificação:**
-- **Type Safety:** Atributos tipados; IDE autocomplete [16]
+- **Type Safety:** Atributos tipados; IDE autocomplete
 - **Métodos:** Funções como `dominates()`, `get_heuristic()` vinculadas aos dados
 - **Serialização:** Fácil converter para JSON/CSV para persistência
 - **Extensibilidade:** Adicionar novos atributos sem quebrar assinaturas de funções
@@ -1251,7 +1289,7 @@ class GraphRoute:
 **Justificação:**
 - **Validação:** Verificar se A* vs Dijkstra convergem (devem ter mesmas soluções Pareto)
 - **Benchmarking:** Medir tempo de execução, número de soluções, qualidade
-- **Reprodutibilidade:** Testes automáticos evitam enviesamentos manuais [17]
+- **Reprodutibilidade:** Testes automáticos evitam enviesamentos manuais
 - **Documentação:** Resultados servem como evidência científica das escolhas
 
 **Métrica de Comparação:** Cobertura Pareto
@@ -1280,32 +1318,7 @@ Idealmente: A* ≥ 0.8, Dijkstra = 1.0, ACO ≥ 0.7
 
 ---
 
-### 12. API REST com FastAPI
-
-**Decisão:** Expor sistema via **API HTTP REST** em vez de apenas CLI.
-
-**Justificação:**
-- **Integração:** Permite consumo por aplicações web/mobile
-- **Escalabilidade:** ASGI suporta múltiplos clientes concorrentes
-- **Padrão:** REST é standard da indústria para APIs [18]
-- **Documentação:** FastAPI gera Swagger/OpenAPI automaticamente
-
-**Endpoint implementado:**
-```
-GET /geocode?address=Torre%20dos%20Clérigos&city=Porto&country=Portugal
-→ {"lat": 41.1438, "lon": -8.6290}
-```
-
-Futura expansão:
-```
-POST /route
-Body: {origin: [lat, lon], destination: [lat, lon], start_time: "HH:MM:SS"}
-Response: {routes: [Solution, ...]}
-```
-
----
-
-### 13. Documentação Tripla: Manual + Teste + Técnica
+### 12. Documentação:
 
 **Decisão:** Criar **3 ficheiros de documentação complementares**.
 
@@ -1315,27 +1328,7 @@ Response: {routes: [Solution, ...]}
 - **code/TECHNICAL_DOCUMENTATION.md:** Documentação técnica aprofundada
 - **Main README.md:** Visão geral + decisões (este ficheiro)
 
-**Teoria:** "Documentation at Multiple Levels" melhora adoção e manutenibilidade [19]
-
----
-
-### Resumo das Opções Técnicas
-
-| Opção | Escolha | Justificação-chave |
-|-------|---------|-------------------|
-| Otimização | Multi-Objetivo (3 critérios) | Realismo + Pareto frontier |
-| Algoritmos | A* + Dijkstra + ACO | Velocidade + Qualidade + Criatividade |
-| Grafo | Multimodal (GTFS + OSM) | Realista + Abrangente |
-| Dados | GTFS reais (Metro + STCP) | Validação real + Reprodutível |
-| Heurística | Distância / Velocidade | Admissível + Consistente |
-| Pruning | Pareto dominância | Eficiente + Útil ao utilizador |
-| Geo | Distâncias reais (OSM) | Realista (vs euclidiana) |
-| CO₂ | Emissões específicas/modo | Comparação quantitativa |
-| Estrutura | Classes OOP (Solution, Graph) | Type-safe + Extensível |
-| Avaliação | Framework automático | Validação científica |
-| Testes | 22 casos × 6 complexidades | Cobertura abrangente |
-| API | REST com FastAPI | Integração + Escalabilidade |
-| Docs | 4 ficheiros em cascata | Acessibilidade múltipla |
+**Teoria:** "Documentation at Multiple Levels" melhora adoção e manutenibilidade
 
 ---
 
@@ -1419,7 +1412,7 @@ $$\text{Minimize: } \begin{cases} f_1(x) = \text{total\_time} \\ f_2(x) = \text{
 
 **Justificação:**
 - Abordagem Pareto preserva toda a informação de trade-off
-- Utilizador escolhe baseado em preferências (não predeterminadas) [1]
+- Utilizador escolhe baseado em preferências (não predeterminadas)
 - Evita bias introduzido por pesos ad-hoc
 
 **Propriedade:** Cada solução no resultado é **não-dominada localmente** (entre soluções mantidas) e idealmente **não-dominada globalmente** (verdadeira fronteira Pareto).
@@ -1531,7 +1524,7 @@ Dijkstra_Multi(G, s, d, t_start):
 | `EPSILON` | 60s | Tolerância temporal para evitar explosão de labels |
 
 **Propriedade Teórica:** 
-Dijkstra sem heurística $h \equiv 0$ expande sempre o nó com menor custo real acumulado. Isto garante **optimalidade em grafos com pesos não-negativos** [2].
+Dijkstra sem heurística $h \equiv 0$ expande sempre o nó com menor custo real acumulado. Isto garante **optimalidade em grafos com pesos não-negativos**.
 
 No contexto multi-objetivo:
 - **Garantia:** Encontra todas as soluções não-dominadas (se espaço/tempo permitirem)
@@ -1610,7 +1603,7 @@ ACO(G, s, d, t_start, n_ants=30, n_iter=20):
 | Parâmetro | Valor | Descrição | Justificação |
 |-----------|-------|-----------|-------------|
 | `ALPHA` | 1.0 | Peso do feromónio | Balanço entre exploração + memória da população |
-| `BETA` | 3.0 | Peso da heurística (visibilidade) | Focado no destino (BETA > ALPHA) [3] |
+| `BETA` | 3.0 | Peso da heurística (visibilidade) | Focado no destino (BETA > ALPHA) |
 | `RHO` | 0.1 | Taxa de evaporação | Esquecer soluções antigas (ρ=0.1 = 10% evaporação/iter) |
 | `Q` | 100 | Constante de depósito | Escala da recompensa de feromónios |
 | `num_ants` | 30 | Formigas por iteração | Suficiente para exploração (30 = ~300 caminhos tentados) |
@@ -1635,7 +1628,7 @@ Apenas soluções **Pareto-ótimas** depositam feromónios (não todos os caminh
 
 $$\Delta\tau = \frac{Q}{sol.total\_time / 60.0}$$
 
-Isto reforça rotas boas e evita convergência prematura [4].
+Isto reforça rotas boas e evita convergência prematura.
 
 ---
 
@@ -1819,9 +1812,9 @@ class ComparativeEvaluator:
 
 #### Por que 3 Algoritmos?
 
-1. **A* = Velocidade prática** - Heurística reduz expansões desnecessárias [5]
-2. **Dijkstra = Garantia científica** - Prova de optimalidade em grafos de peso não-negativo [2]
-3. **ACO = Exploração criativa** - Estocástico; encontra soluções inesperadas [6]
+1. **A* = Velocidade prática** - Heurística reduz expansões desnecessárias
+2. **Dijkstra = Garantia científica** - Prova de optimalidade em grafos de peso não-negativo
+3. **ACO = Exploração criativa** - Estocástico; encontra soluções inesperadas
 
 #### Por que estes Parâmetros?
 
@@ -1835,7 +1828,7 @@ class ComparativeEvaluator:
 A abordagem Pareto:
 - ✅ Preserva toda a informação de trade-off
 - ✅ Não requer calibração de pesos (ad-hoc)
-- ✅ Adequada para decisão multi-critério [1]
+- ✅ Adequada para decisão multi-critério
 - ❌ Mais computacionalmente custosa (mas aceitável para redes de ~10k nós)
 
 ---
@@ -1897,8 +1890,8 @@ Rotas longas com múltiplas alternativas ou contextos desafiantes.
 | Caso | Origem | Destino | Dist. | Tempo | Descrição |
 |------|--------|---------|-------|-------|-----------|
 | TC-4.1 | Maia | Espinho (Aveiro) | 35km | 1h | Longa, múltiplas alternativas |
-| TC-4.2 | Campanhã | Gaia Centre | 8km | 40min | Hora de pico, muitos hubs |
-| TC-4.3 | Parque Cidade | Vilar do Conde | 18km | 50min | Madrugada (6h), conectividade mínima |
+| TC-4.2 | Campanhã | Gaia Centro | 8km | 40min | Hora de pico, muitos hubs |
+| TC-4.3 | Parque Cidade | Vila do Conde | 18km | 50min | Madrugada (6h), conectividade mínima |
 
 **Propriedade:** 6-15 soluções. Algoritmos divergem. ACO vantajoso em TC-4.3.
 
@@ -1911,7 +1904,7 @@ Edge cases e validação de comportamentos esperados.
 | Caso | Origem | Destino | Dist. | Tempo | Descrição |
 |------|--------|---------|-------|-------|-----------|
 | TC-5.1 | Rua Clérigos | Torre Clérigos | 0.1km | 1min | Origem ≈ Destino |
-| TC-5.2 | Bolhão | Gaia Centre | 7km | 30min | Máxima diversidade Pareto |
+| TC-5.2 | Bolhão | Gaia Centro | 7km | 30min | Máxima diversidade Pareto |
 | TC-5.3 | S. Bento | Vila Nova Gaia | 4km | 20min | A* vs Dijkstra convergência |
 
 **Propriedade:** 
@@ -1939,10 +1932,10 @@ Testes de robustez em condições adversas.
 Todos os casos estão contidos na **Área Metropolitana do Porto**, cobrindo:
 
 - **Porto (centro):** Livraria Bertrand, Torre Clérigos, Casa Música, Ribeira, Bolhão, S. Bento, Parque Cidade, etc.
-- **Vila Nova de Gaia:** Gaia Centre, Francelos, Vila Nova Gaia
+- **Vila Nova de Gaia:** Gaia Centro, Francelos, Vila Nova Gaia
 - **Matosinhos:** Exponor
 - **Maia:** Periferia norte
-- **Vilar do Conde:** Periferia norte-nordeste
+- **Vila do Conde:** Periferia norte-nordeste
 - **Espinho:** Limite sul
 
 **Nota:** Sem casos de cidades como Aveiro ou Braga (fora da área metropolitana).
@@ -2092,120 +2085,93 @@ Para cada caso de teste, o sistema é considerado **bem-sucedido** quando:
 
 ---
 
-```
-CIN_GRUPO6/
-│
-├── README.md                          # Este ficheiro
-├── code/                              # Código-fonte principal
-│   ├── pyproject.toml                 # Configuração Poetry (gestor de dependências)
-│   ├── requirements.txt               # Dependências (formato pip)
-│   ├── USER_GUIDE.md                  # Guia de uso para utilizadores
-│   ├── TESTING_GUIDE.md               # Guia de execução de testes
-│   ├── TECHNICAL_DOCUMENTATION.md     # Documentação técnica detalhada
-│   │
-│   ├── app/                           # Código Python principal
-│   │   ├── main.py                    # API FastAPI para geocodificação
-│   │   ├── test_cases.py              # 22 casos de teste com 6 níveis de complexidade
-│   │   ├── evaluation_framework.py    # Framework para avaliação comparativa
-│   │   │
-│   │   ├── models/                    # Modelos de dados
-│   │   │   └── __init__.py
-│   │   │
-│   │   ├── services/                  # Serviços principais
-│   │   │   ├── __init__.py
-│   │   │   ├── graph.py               # Construção do grafo multimodal
-│   │   │   ├── solution.py            # Classe Solution (representa uma rota)
-│   │   │   │
-│   │   │   └── algoritms/             # Algoritmos de roteamento
-│   │   │       ├── a_star.py          # A* Multi-Objetivo com heurística
-│   │   │       ├── dijkstra.py        # Dijkstra Multi-Label (exaustivo)
-│   │   │       └── aco.py             # ACO (Ant Colony Optimization)
-│   │   │
-│   │   └── utils/                     # Funções utilitárias
-│   │       ├── __init__.py
-│   │       ├── feed.py                # Carregamento de dados GTFS
-│   │       ├── geo.py                 # Geocodificação e operações geográficas
-│   │       ├── route.py               # Cálculo de custos de rotas
-│   │       ├── co2.py                 # Estimativa de emissões CO2
-│   │       └── time.py                # Manipulação de horários GTFS
-│   │
-│   ├── feeds/                         # Dados de transportes públicos
-│   │   ├── gtfs_metro/                # Dados GTFS - Metro do Porto
-│   │   │   ├── agency.txt             # Informação de agência
-│   │   │   ├── stops.txt              # 95+ paragens de metro
-│   │   │   ├── routes.txt             # 6 linhas de metro
-│   │   │   ├── trips.txt              # Viagens planejadas
-│   │   │   ├── stop_times.txt         # Horários de paragem
-│   │   │   ├── calendar.txt           # Calendários de operação
-│   │   │   ├── calendar_dates.txt     # Exceções de calendário
-│   │   │   ├── shapes.txt             # Traçados das linhas
-│   │   │   ├── transfers.txt          # Transferências entre paragens
-│   │   │   ├── fare_attributes.txt    # Tarifas
-│   │   │   └── fare_rules.txt         # Regras de tarifação
-│   │   │
-│   │   └── gtfs_stcp/                 # Dados GTFS - STCP (autocarros urbanos)
-│   │       ├── agency.txt
-│   │       ├── stops.txt              # 1000+ paragens de autocarro
-│   │       ├── routes.txt             # 100+ linhas de autocarro
-│   │       ├── trips.txt
-│   │       ├── stop_times.txt
-│   │       ├── calendar.txt
-│   │       ├── calendar_dates.txt
-│   │       ├── shapes.txt
-│   │       └── transfers.txt
-│   │
-│   └── notebook/                      # Jupyter Notebooks (exploração interativa)
-│       └── route-optimization-optimized.ipynb
+<a id="guia-de-instalação"></a>
+
+## 🛠️ Instalação e Configuração
+
+### Pré-requisitos
+- **Python 3.12+**
+- **Poetry 1.8+** (recomendado)
+- **Git**
+- **4 GB RAM**
+
+### Instalação com Poetry (Recomendado)
+
+```bash
+cd code/
+poetry install
+poetry shell
 ```
 
-### Descrição dos Ficheiros Principais
+### Instalação com pip
 
-#### `app/services/graph.py`
-Responsável pela construção do grafo multimodal que integra:
-- Rede de transportes públicos (GTFS)
-- Rede de ruas urbanas (OpenStreetMap via OSMnx)
-- Nós de transferência entre transportes
+```bash
+cd code/
+python -m venv venv
+source venv/bin/activate  # Windows: .\venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-#### `app/services/solution.py`
-Define a classe `Solution` que representa uma rota calculada com:
-- `total_time`: Tempo total em segundos
-- `total_co2`: Emissões em gramas
-- `total_walk_km`: Distância a pé em quilómetros
-- `arrival_sec`: Hora de chegada
-- `path`: Traçado detalhado da rota
+### Carregando Dados GTFS
 
-#### `app/services/algoritms/a_star.py`
-Implementação do algoritmo A* com:
-- Heurística admissível (distância mínima teórica)
-- Função multi-objetivo com ponderação
-- Diversidade de soluções por nó
+Para descarregar dados do Metro do Porto e STCP:
 
-#### `app/services/algoritms/dijkstra.py`
-Variante rigorosa do Dijkstra com:
-- Múltiplos labels por nó
-- Pruning por dominância Pareto
-- Garantia de otimalidade
+```bash
+# Descarrega automaticamente datasets públicos
+python -m app.utils.loaddata
+```
 
-#### `app/services/algoritms/aco.py`
-Algoritmo ACO com:
-- Exploração estocástica via feromona
-- Reforço apenas de soluções Pareto-ótimas
-- Capacidade de encontrar rotas criativas
+Isto popula `feeds/gtfs_metro` e `feeds/gtfs_stcp` com os ficheiros necessários.
 
-#### `app/test_cases.py`
-Conjunto de 22 casos de teste organizados em 6 grupos de complexidade:
-- Trivial (2 casos)
-- Baixa (2 casos)
-- Média (3 casos)
-- Alta (3 casos)
-- Especial (3 casos)
-- Extrema (2 casos)
+---
 
-#### `app/evaluation_framework.py`
-Framework para avaliação comparativa de algoritmos com:
-- Classe `ComparativeEvaluator` para execução de testes
-- Classe `AlgorithmMetrics` para recolha de métricas
-- Exportação de resultados em JSON
+### 📦 Dependências Principais
+
+| Biblioteca | Versão | Propósito |
+|-----------|--------|----------|
+| **pandas** | 2.3.3+ | Dados GTFS |
+| **networkx** | 3.6.1+ | Grafos |
+| **osmnx** | 2.0.7+ | OpenStreetMap |
+| **scipy** | 1.16.3+ | Algoritmos |
+| **folium** | 0.20.0+ | Mapas |
+
+Ver [requirements.txt](code/requirements.txt) para lista completa.
+
+---
+
+### 🛠️ Utilidades Especializadas
+
+#### **loaddata.py** 💾 - Carregamento de Dados GTFS
+
+```bash
+python -m app.utils.loaddata
+```
+
+**O que faz:**
+- ✅ Descarrega datasets GTFS públicos (Metro + STCP)
+- ✅ Extrai ficheiros GTFS em `feeds/`
+- ✅ Valida integridade dos dados
+- ✅ Indexa para acesso rápido
+
+**Dados descarregados:**
+- 🚇 Metro: 95+ paragens, 6 linhas, horários em tempo real
+- 🚌 STCP: 1000+ paragens, 100+ linhas
+
+#### **map.py** 🗺️ - Visualização de Rotas
+
+```python
+from app.utils.map import create_comparison_map_detailed
+
+# Gerar mapa interativo com 3 melhores rotas
+mapa = create_comparison_map_detailed(solutions, grafo, stops_df)
+```
+
+**Funcionalidades:**
+- 🎨 Cores por modo (Vermelho=Metro, Azul=Autocarro, Cinza=Caminhada)
+- 📊 Camadas comparáveis (Rápida, Ecológica, Saudável)
+- 📍 Marcadores de paradas, transferências, origem/destino
+- 🔍 Zoom e pan interativos
+- 📱 Compatível com navegadores web
 
 ---
 
@@ -2218,19 +2184,19 @@ Framework para avaliação comparativa de algoritmos com:
 #### **Python 3.12+** ✅
 - **Versão Necessária:** `>=3.12,<3.14.1 || >3.14.1`
 - **Justificação Técnica:**
-  - Sintaxe clara e expressiva, ideal para algoritmos complexos [1]
+  - Sintaxe clara e expressiva, ideal para algoritmos complexos
   - Excelente ecossistema científico (NumPy, SciPy, Pandas)
-  - Type hints nativos para maior robustez [2]
+  - Type hints nativos para maior robustez
   - Performance suficiente com NumPy/Cython para processamento geoespacial
   - Comunidade ativa em data science e otimização
 
 ### 2. Gestor de Dependências e Empacotamento
 
-#### **Poetry** (v2.0+) ✅
+#### **Poetry** (v1.8+) ✅
 - **Função:** Gestão declarativa de dependências e ambientes virtuais
 - **Justificação:**
-  - Resolução automática de conflitos de dependências [3]
-  - Lock file (`poetry.lock`) para reprodutibilidade [4]
+  - Resolução automática de conflitos de dependências
+  - Lock file (`poetry.lock`) para reprodutibilidade
   - Gestão integrada de ambientes virtuais
   - Alternativa moderna ao pip/venv com melhor UX
   - Referência: https://python-poetry.org/
@@ -2241,7 +2207,7 @@ Framework para avaliação comparativa de algoritmos com:
 - **Função:** Manipulação e análise de dados tabulares
 - **Aplicações:** Processamento de ficheiros GTFS (stops.txt, stop_times.txt, etc.)
 - **Justificação:**
-  - Estrutura DataFrame ideal para dados heterogéneos (texto, números, horários) [5]
+  - Estrutura DataFrame ideal para dados heterogéneos (texto, números, horários)
   - Operações eficientes em dados de grande escala
   - Integração com GeoPandas para dados geoespaciais
   - Referência: McKinney, W. (2010). "Data Structures for Statistical Computing in Python"
@@ -2249,7 +2215,7 @@ Framework para avaliação comparativa de algoritmos com:
 #### **NumPy (v1.24+)** (indireto)
 - **Função:** Operações numéricas vetorizadas
 - **Justificação:**
-  - Implementação em C para performance crítica [6]
+  - Implementação em C para performance crítica
   - Base de todo o ecossistema Python científico
   - Essencial para cálculos matriciais em grafos
 
@@ -2257,7 +2223,7 @@ Framework para avaliação comparativa de algoritmos com:
 - **Função:** Algoritmos científicos avançados
 - **Aplicações:** Otimização, análise linear (em potencial uso futuro)
 - **Justificação:**
-  - Implementações rigorosas de algoritmos numéricos [7]
+  - Implementações rigorosas de algoritmos numéricos
   - Estruturas eficientes para grafos esparsos
   - Referência: https://scipy.org/
 
@@ -2270,10 +2236,10 @@ Framework para avaliação comparativa de algoritmos com:
   - Operações de BFS, DFS, caminhos mais curtos
   - Análise de conectividade da rede
 - **Justificação:**
-  - Biblioteca padrão para grafos em Python [8]
+  - Biblioteca padrão para grafos em Python
   - API intuitiva e bem documentada
   - Suporta grafos ponderados e direcionados
-  - Performance adequada para grafos de ~10k nós [9]
+  - Performance adequada para grafos de ~10k nós
   - Referência: Hagberg, A., Schult, D., & Swart, P. (2008). "Exploring network structure, dynamics, and function using NetworkX"
 
 #### **OSMnx (v2.0.7+)** ✅
@@ -2283,7 +2249,7 @@ Framework para avaliação comparativa de algoritmos com:
   - Cálculo de distâncias reais (não euclidianas) entre pontos
   - Integração de geometrias de ruas no grafo
 - **Justificação:**
-  - Único fornecedor de fácil acesso a OSM em Python [10]
+  - Único fornecedor de fácil acesso a OSM em Python
   - Dados continuamente atualizados (Wiki OSM)
   - Performance otimizada com caching
   - Elimina implementações caseiras de API calls
@@ -2298,9 +2264,9 @@ Framework para avaliação comparativa de algoritmos com:
   - Validação de geometrias
   - Operações de proximidade
 - **Justificação:**
-  - Standard de facto em GIS com Python [11]
+  - Standard de facto em GIS com Python
   - Implementação em C (GEOS) para performance
-  - Suporta todas as operações OGC Simple Features [12]
+  - Suporta todas as operações OGC Simple Features
   - Referência: https://shapely.readthedocs.io/
 
 #### **Geopy (v2.4.1+)** ✅
@@ -2309,7 +2275,7 @@ Framework para avaliação comparativa de algoritmos com:
   - Conversão de endereços de utilizadores em coordenadas geográficas
   - API para serviços de geocodificação (Nominatim/OpenStreetMap)
 - **Justificação:**
-  - Interface unificada para múltiplos serviços de geocodificação [13]
+  - Interface unificada para múltiplos serviços de geocodificação
   - Acesso gratuito via Nominatim (baseado em OSM)
   - Tratamento automático de timeouts e retries
   - Referência: https://geopy.readthedocs.io/
@@ -2323,7 +2289,7 @@ Framework para avaliação comparativa de algoritmos com:
   - Validação de consistência de dados
   - Queries sobre horários e rotas
 - **Justificação:**
-  - GTFS é o padrão internacional para dados de transportes [14]
+  - GTFS é o padrão internacional para dados de transportes
   - Biblioteca Python especializada em GTFS
   - Validação automática de integridade
   - Referência: https://gtfs-kit.readthedocs.io/
@@ -2337,7 +2303,7 @@ Framework para avaliação comparativa de algoritmos com:
   - Clustering potencial de paragens (uso futuro)
   - Métricas de avaliação
 - **Justificação:**
-  - Biblioteca mais confiável em ML com Python [15]
+  - Biblioteca mais confiável em ML com Python
   - API consistente e bem documentada
   - Implementações otimizadas de algoritmos clássicos
   - Referência: Pedregosa, F., et al. (2011). "Scikit-learn: Machine Learning in Python"
@@ -2350,7 +2316,7 @@ Framework para avaliação comparativa de algoritmos com:
   - Endpoint `/geocode` para conversão endereço ↔ coordenadas
   - Interface para consumo do motor de roteamento
 - **Justificação:**
-  - Framework moderno e de alta performance [16]
+  - Framework moderno e de alta performance
   - Validação automática de parâmetros (Pydantic)
   - Documentação automática (OpenAPI/Swagger)
   - Referência: https://fastapi.tiangolo.com/
@@ -2358,7 +2324,7 @@ Framework para avaliação comparativa de algoritmos com:
 #### **Uvicorn (v0.30.0+)** ✅
 - **Função:** Servidor ASGI para rodar FastAPI
 - **Justificação:**
-  - Implementação ASGI mais rápida em Python [17]
+  - Implementação ASGI mais rápida em Python
   - Suporta concorrência e async/await
   - Baixo overhead de memória
   - Referência: https://www.uvicorn.org/
@@ -2371,7 +2337,7 @@ Framework para avaliação comparativa de algoritmos com:
   - Notebook interativo para testes e visualizações
   - Ambiente exploratório para investigação
 - **Justificação:**
-  - Standard para análise exploratória em ciência de dados [18]
+  - Standard para análise exploratória em ciência de dados
   - Suporta visualizações inline
   - Facilita reprodutibilidade com código + documentação
 
@@ -2381,7 +2347,7 @@ Framework para avaliação comparativa de algoritmos com:
   - Renderização de rotas calculadas em mapas interativos
   - Visualização de paragens e nós do grafo
 - **Justificação:**
-  - Wrapper Python sobre Leaflet.js (biblioteca JavaScript padrão) [19]
+  - Wrapper Python sobre Leaflet.js (biblioteca JavaScript padrão)
   - Suporta múltiplas camadas (basemaps, marcadores, polígonos)
   - Exporta mapas como HTML independente
   - Referência: https://folium.readthedocs.io/
@@ -2503,6 +2469,60 @@ Para mais detalhes, consulta [USER_GUIDE.md](code/USER_GUIDE.md).
 
 ## 🤝 Contribuições
 
-Este projeto é desenvolvido como parte da disciplina de Computação Inteligente (CIN) no Mestrado em Inteligência Artificial - Universidade do Porto.
+Este projeto é desenvolvido como parte da disciplina **Computação Inspirada na Natureza (CIN)** do Mestrado em Inteligência Artificial da Universidade do Minho.
 
-Repositório de projeto académico - Universidade do Porto, 2024
+**Disciplina:** Computação Inspirada na Natureza (CIN)
+**Instituição:** Universidade do Minho, Escola de Engenharia
+**Ano Letivo:** 2025-2026
+
+---
+
+<a id="licença"></a>
+
+## 📄 Licença
+
+**Tipo:** Projeto Académico - Uso Educacional
+
+### Autorização de Uso
+
+Este código é disponibilizado para fins **académicos e educacionais**.
+
+**É permitido:**
+- ✅ Visualizar, estudar e compreender o código
+- ✅ Modificar para fins educacionais pessoais
+- ✅ Usar como referência para aprender algoritmos de otimização
+- ✅ Reproduzir resultados para fins de investigação
+
+**Não é permitido:**
+- ❌ Usar comercialmente sem permissão
+- ❌ Publicar/distribuir cópias modificadas sem crédito
+- ❌ Remover atribuições ao Grupo 6
+
+### Citação Recomendada
+
+Se usar este código como referência, cite:
+
+```bibtex
+@misc{CIN_GRUPO6_2025,
+  title={Sistema de Roteamento Multimodal para a Área Metropolitana do Porto},
+  author={Bergueira, Carlos and Silva, Diego and Pereira, Filipa and Rodrigues, Rui},
+  year={2025},
+  publisher={Universidade do Minho},
+  institution={Escola de Engenharia},
+  note={Projeto da disciplina Computação Inspirada na Natureza}
+}
+```
+
+### Dados e Dependências
+
+Os dados GTFS e mapas utilizados estão sob as seguintes licenças:
+
+- **GTFS Metro do Porto:** Dados públicos - [Metrodoporto, S.A.](https://www.metrodoporto.pt/)
+- **GTFS STCP:** Dados públicos - [STCP](https://www.stcp.pt/)
+- **OpenStreetMap:** [ODbL License](https://opendatacommons.org/licenses/odbl/)
+
+---
+
+**Versão:** 1.0
+**Última atualização:** Dezembro 2025
+**Status:** Produção

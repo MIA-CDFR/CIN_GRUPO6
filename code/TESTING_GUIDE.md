@@ -1,5 +1,10 @@
 # 🧪 Guia de Execução e Interpretação de Testes
 
+**📚 Documentação Relacionada:**
+- [USER_GUIDE.md](USER_GUIDE.md) - Guia prático para utilizadores
+- [TECHNICAL_DOCUMENTATION.md](TECHNICAL_DOCUMENTATION.md) - Detalhes técnicos e arquitetura
+- [README.md](../README.md) - Visão geral do projeto
+
 ## Índice
 
 1. [Visão Geral](#visão-geral)
@@ -41,19 +46,28 @@ python --version
 
 ### Dados Necessários
 
-Os ficheiros GTFS devem estar em `feeds/`:
+Os ficheiros GTFS devem estar em `feeds/`. Se não existem, descarregue com:
+
+```bash
+# Descarregar dados públicos do Porto (Metro + STCP)
+python -m app.utils.loaddata
+```
+
+Estrutura esperada:
 ```
 feeds/
-  ├── gtfs_metro/
+  ├── gtfs_metro/              # 🚇 Metro do Porto
   │   ├── stops.txt
   │   ├── stop_times.txt
   │   ├── routes.txt
   │   └── ...
-  └── gtfs_stcp/
+  └── gtfs_stcp/               # 🚌 STCP (Autocarros)
       ├── stops.txt
       ├── stop_times.txt
       └── ...
 ```
+
+Ver [loaddata.py](app/utils/loaddata.py) para detalhes sobre download e cache.
 
 ---
 
@@ -172,77 +186,86 @@ Rota 3 (Dijkstra apenas):
 #### Via Python (Notebook/Script)
 
 ```python
-from app.test_cases import TestCaseEvaluator, TEST_CASES
-from app.services.graph import GraphRoute
+from app.test_cases import TestCaseEvaluator
 from app.services.algoritms.a_star import optimized_multi_objective_routing
-from app.utils.geo import get_geocode_by_address
-from datetime import datetime
+from app.services.graph import graph as G  # Grafo global pré-carregado
+import time
 
 # Selecionar caso
 test_case = TestCaseEvaluator.get_by_id("TC-3.1")
 
-# Geocodificar origem/destino
-origin = get_geocode_by_address(test_case['origem'])
-destination = get_geocode_by_address(test_case['destino'])
-start_time = datetime.strptime(test_case['start_time'], "%H:%M:%S").time()
+# Extrair origem, destino e hora
+origin = test_case['origem']  # ex: "Santa Apolónia"
+destination = test_case['destino']  # ex: "Francelos"
+start_time_str = test_case['start_time']  # ex: "09:00:00"
 
-# Carregar grafo
-graph = GraphRoute()
+# Converter hora para segundos
+hours, minutes, seconds = map(int, start_time_str.split(':'))
+start_time_sec = hours * 3600 + minutes * 60 + seconds
 
 # Executar A*
-from app.services.algoritms.a_star import optimized_multi_objective_routing
-routes_astar = optimized_multi_objective_routing(
-    graph,
-    (origin.y, origin.x),  # (lat, lon)
-    (destination.y, destination.x),
-    start_time
+print(f"🔍 Testando A* de {origin} para {destination}...")
+start = time.time()
+solutions_astar = optimized_multi_objective_routing(
+    G,
+    origin=origin,
+    destination=destination,
+    start_time_sec=start_time_sec
 )
+elapsed = time.time() - start
 
-print(f"✓ A* encontrou {len(routes_astar)} soluções")
-for i, route in enumerate(routes_astar, 1):
-    print(f"  Rota {i}: {route.total_time}s, {route.total_co2:.1f}g, {route.total_walk_km:.2f}km")
+print(f"✓ A* encontrou {len(solutions_astar)} soluções em {elapsed:.2f}s")
+for i, sol in enumerate(solutions_astar, 1):
+    hours_arr = sol.arrival_sec // 3600
+    minutes_arr = (sol.arrival_sec % 3600) // 60
+    print(f"  Rota {i}: {sol.total_time//60}min, {sol.total_co2:.1f}g CO2, {sol.total_walk_km:.2f}km a pé")
+    print(f"           Chega às {hours_arr:02d}:{minutes_arr:02d}")
 ```
 
 ### 3. Executar Todos os Testes (Batches)
 
 ```bash
-# Executar todos os 22 testes e gerar relatório
-python -m app.evaluation_framework --all --output results.json
+# Executar todos os 22 testes
+python -m app.test_cases
 ```
 
 **Saída Esperada:**
 ```
-🚀 Iniciando teste de todos os 22 casos...
+🧪 SISTEMA DE TESTES - 22 Casos Disponíveis
+════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-🟢 Grupo TRIVIAL
-  ✓ TC-1.1 passou (3 soluções, A*: 0.8s, Dijkstra: 1.2s, ACO: 2.1s)
-  ✓ TC-1.2 passou (2 soluções, A*: 0.5s, Dijkstra: 0.9s, ACO: 1.5s)
+🟢 TRIVIAL (2 casos)
+   TC-1.1: Livraria Bertrand → Torre dos Clérigos
+   TC-1.2: Estação S. Bento → Matosinhos
 
-🟡 Grupo BAIXA
-  ✓ TC-2.1 passou (5 soluções, A*: 1.2s, Dijkstra: 2.5s, ACO: 4.3s)
-  ✓ TC-2.2 passou (4 soluções, A*: 1.5s, Dijkstra: 3.1s, ACO: 5.2s)
+🟡 BAIXA (2 casos)
+   TC-2.1: Mercado Bolhão → Ribeira
+   TC-2.2: Casa Música → Livraria Lello
 
-... (demais grupos)
+🟠 MÉDIA (3 casos)
+   TC-3.1: Santa Apolónia → Francelos
+   TC-3.2: Parque Cidade → Livraria Lello
+   TC-3.3: Centro → Espinho
 
-═══════════════════════════════════════════════════════
-                    RESUMO FINAL
-═══════════════════════════════════════════════════════
+🔴 ALTA (5 casos)
+   TC-4.1: Maia → Espinho
+   TC-4.2: Arcozelo → Matosinhos
+   TC-4.3: Parque Cidade → Vila do Conde (MADRUGADA)
+   TC-4.4: Vila do Conde → Maia
+   TC-4.5: Periferia → Periferia
 
-Casos Executados: 22
-Casos Passaram: 22 ✓
-Casos Falharam: 0
+🔵 ESPECIAL (5 casos)
+   TC-5.1: Torre dos Clérigos → Torre dos Clérigos (Origem=Destino)
+   TC-5.2: S. Bento → Vila Nova de Gaia
+   TC-5.3: Validação Convergência (A* vs Dijkstra)
+   TC-5.4: Extremos CO2
+   TC-5.5: ACO Estocástico
 
-Tempo Total: 187.5 segundos (3.1 minutos)
-
-Cobertura Média (A* vs Dijkstra): 87.3%
-Cobertura Média (ACO vs Dijkstra): 71.2%
-
-Performance:
-  A* médio:      1.8s
-  Dijkstra médio: 4.2s
-  ACO médio:     7.5s
-
-Resultados salvos em: results.json
+⚫ EXTREMO (4 casos)
+   TC-6.1: Localização Isolada
+   TC-6.2: Madrugada (23:30)
+   TC-6.3: Restrições Temporais
+   TC-6.4: Casos Edge
 ```
 
 ### 4. Executar por Grupo de Complexidade
@@ -257,6 +280,8 @@ python -m app.test_cases --group medium
 # Apenas testes EXTREMOS
 python -m app.test_cases --group extreme
 ```
+
+**Nota:** Use `python -m app.test_cases --help` para ver todas as opções disponíveis.
 
 ---
 
@@ -375,16 +400,23 @@ Complexidade: Muito Baixa
 
 **Possíveis Problemas:**
 ```
-❌ Erro de geocodificação
-   → Verificar se os endereços estão registados no Nominatim
-   → Testar manualmente: 
-       from app.utils.geo import get_geocode_by_address
-       print(get_geocode_by_address("Livraria Bertrand"))
+❌ Erro de Módulo não encontrado
+   → Confirmar que está no diretório correto:
+       cd d:\GIT\MIA\CIN_GRUPO6\code
+   → Verificar instalação:
+       python -m app.test_cases
 
-❌ Tempo > 2s para qualquer algoritmo
-   → Verificar se grafo está carregado
-   → Reexecutar com --debug flag:
-       python -m app.test_cases --case TC-1.1 --debug
+❌ Nenhuma rota encontrada
+   → Grafo pode não estar carregado
+   → Verificar se feeds/ tem dados GTFS:
+       python -m app.utils.loaddata
+   → Testar com um caso simples (TC-1.1):
+       python -m app.test_cases --case TC-1.1
+
+❌ Tempo > 5s para A*
+   → Possível problema de performance
+   → Verificar métricas do sistema (RAM/CPU)
+   → Tentar com caso mais simples primeiro
 ```
 
 #### TC-1.2: Estação S. Bento → Matosinhos
@@ -503,10 +535,10 @@ Risco: Muitas alternativas, algoritmos podem divergir
 
 Este é um caso onde ACO pode brilhar! Pela estocasticidade, pode descobrir rotas pouco óbvias que A* poderia ter descartado por heurística.
 
-#### TC-4.3: Parque Cidade → Vilar do Conde (Madrugada)
+#### TC-4.3: Parque Cidade → Vila do Conde (Madrugada)
 
 ```
-Localização: Porto → Vilar do Conde
+Localização: Porto → Vila do Conde
 Distância: 18km
 Tempo: ~50 minutos (horário normal)
 Hora: 23:30 (MADRUGADA - teste crítico)
@@ -562,63 +594,59 @@ Esperado: Cobertura A* vs Dijkstra = 100%
 
 ## Troubleshooting
 
-### Erro: "Geocode not found"
+### Erro: "ModuleNotFoundError"
 
-```python
-FileNotFoundError: Could not geocode 'Livraria Bertrand'
+```
+ModuleNotFoundError: No module named 'app'
 ```
 
 **Solução:**
 
-1. Instalar geopy:
+1. Verificar diretório de trabalho:
 ```bash
-poetry add geopy
+cd d:\GIT\MIA\CIN_GRUPO6\code
+pwd  # ou "cd" no Windows para confirmar
 ```
 
-2. Verificar endereço manualmente:
-```python
-from geopy.geocoders import Nominatim
-geocoder = Nominatim(user_agent="test")
-location = geocoder.geocode("Livraria Bertrand, Porto")
-print(location)
+2. Verificar instalação de dependências:
+```bash
+poetry install
+poetry shell
 ```
 
-3. Se nulo, usar nome alternativo:
+3. Testar import simples:
 ```python
-# Ao invés de "Livraria Bertrand", usar:
-"Rua Garret 71, Porto"  # Endereço mais específico
+cd d:\GIT\MIA\CIN_GRUPO6\code
+python -c "from app.test_cases import TestCaseEvaluator; print('✓ OK')"
 ```
 
 ---
 
 ### Erro: "GTFS data not found"
 
-```python
+```
 FileNotFoundError: feeds/gtfs_metro not found
 ```
 
 **Solução:**
 
-1. Verificar estrutura:
+1. Usar `loaddata.py` para descarregar automaticamente:
+```bash
+python -m app.utils.loaddata
+```
+
+2. Verificar estrutura após download:
 ```bash
 ls -la feeds/
 # Deve existir: feeds/gtfs_metro/ e feeds/gtfs_stcp/
+ls feeds/gtfs_metro/stops.txt  # Validar que ficheiros existem
 ```
 
-2. Se faltam ficheiros:
+3. Se ainda falta algo, descarregar manualmente:
 ```bash
-# Baixar GTFS do Porto
+# Ver [USER_GUIDE.md](USER_GUIDE.md) Passo 3 para instruções
 # https://www.metro.pt/pt/empresa/open-data
-# ou
 # https://www.stcp.pt/pt/empresa/desenvolvimento-aberto
-```
-
-3. Extrair ficheiros:
-```bash
-cd feeds/gtfs_metro/
-unzip gtfs_metro.zip
-cd ../gtfs_stcp/
-unzip gtfs_stcp.zip
 ```
 
 ---
@@ -644,9 +672,9 @@ MAX_LABELS_PER_NODE = 5  # Era 10, agora 5
 
 3. Verificar se grafo carrega:
 ```python
-from app.services.graph import GraphRoute
-g = GraphRoute()
-print(f"Grafo carregado: {g.G.number_of_nodes()} nós")
+from app.services.graph import graph as G
+print(f"Grafo carregado: {G.number_of_nodes()} nós")
+print(f"Arestas: {G.number_of_edges()}")
 ```
 
 ---
@@ -723,61 +751,55 @@ gc.collect()  # Forçar garbage collection
 
 ---
 
-## Interpretação de Relatórios
+## Visualização de Resultados
 
-### Ficheiro `results.json`
+### 1. Relatório no Terminal
 
-```json
-{
-  "test_id": "TC-3.1",
-  "timestamp": "2025-12-23T10:30:45",
-  "test_case": {
-    "origin": "Santa Apolónia",
-    "destination": "Francelos",
-    "start_time": "09:00:00"
-  },
-  "algorithms": {
-    "a_star": {
-      "execution_time": 3.2,
-      "num_solutions": 8,
-      "solutions": [
-        {
-          "total_time": 2340,
-          "total_co2": 125.5,
-          "total_walk_km": 0.8
-        },
-        ...
-      ]
-    },
-    "dijkstra": {
-      "execution_time": 7.5,
-      "num_solutions": 9,
-      "solutions": [...]
-    },
-    "aco": {
-      "execution_time": 12.3,
-      "num_solutions": 7,
-      "solutions": [...]
-    }
-  },
-  "metrics": {
-    "pareto_coverage_astar_vs_dijkstra": 0.889,
-    "pareto_coverage_aco_vs_dijkstra": 0.778,
-    "spread": 0.184
-  },
-  "status": "PASSED"
-}
+Os testes exibem relatórios formatados diretamente:
+```
+════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+          TEST CASE: TC-3.1 (MÉDIA COMPLEXIDADE)
+════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+📍 Origem: Santa Apolónia
+📍 Destino: Francelos
+⏱️  Tempo esperado: ~40min
+
+RESULTADOS DO A*:
+  ✓ Tempo: 3.2s
+  📊 Soluções: 8
+  🏃 Mais rápida: 2340s (39min)
+  🌱 Mais eco: 125.5g CO2
 ```
 
-### Dashboard Web (Futuro)
+### 2. Visualização de Rotas em Mapa
 
-Para visualizar resultados graficamente:
+Use `map.py` para visualizar soluções graficamente:
 
-```bash
-# (Funcionalidade futura)
-python -m app.evaluation_dashboard --input results.json --port 8000
-# Abrir http://localhost:8000
+```python
+from app.utils.map import visualize_multiple_routes
+from app.services.algoritms.a_star import optimized_multi_objective_routing
+from app.services.graph import graph as G
+
+# Calcular rotas
+solutions = optimized_multi_objective_routing(
+    G,
+    origin="Santa Apolónia",
+    destination="Francelos",
+    start_time_sec=32400
+)
+
+# Visualizar em mapa interativo
+map_obj = visualize_multiple_routes(
+    solutions,
+    graph=G,
+    title="Teste TC-3.1: Fronteira Pareto"
+)
+map_obj.save("test_tc_3_1.html")
+print("✓ Mapa salvo em: test_tc_3_1.html")
 ```
+
+Ver [map.py](app/utils/map.py) para mais detalhes sobre visualização.
 
 ---
 
@@ -794,10 +816,19 @@ Depois de executar os testes:
 
 ## Referências
 
-- [README Principal](README.md) - Descrição completa do projeto
+**Documentação Principal:**
+- [README.md](../README.md) - Descrição e quick start do projeto
 - [USER_GUIDE.md](USER_GUIDE.md) - Guia prático para utilizadores
-- [code/TECHNICAL_DOCUMENTATION.md](TECHNICAL_DOCUMENTATION.md) - Documentação técnica detalhada
-- Algoritmos: `app/services/algoritms/`
-- Casos: `app/test_cases.py`
-- Framework: `app/evaluation_framework.py`
+- [TECHNICAL_DOCUMENTATION.md](TECHNICAL_DOCUMENTATION.md) - Arquitetura e implementação
+
+**Código e Utilitários:**
+- Algoritmos: `app/services/algoritms/` (a_star.py, dijkstra.py, aco.py)
+- Casos de Teste: `app/test_cases.py` (22 casos organizados por complexidade)
+- Carregamento de Dados: `app/utils/loaddata.py` (download e cache GTFS)
+- Visualização: `app/utils/map.py` (mapas interativos com Folium)
+- Grafo Multimodal: `app/services/graph.py` (construção de rede)
+
+**Dados:**
+- GTFS Metro: `feeds/gtfs_metro/` (paragens, horários, rotas)
+- GTFS STCP: `feeds/gtfs_stcp/` (autocarros Porto)
 
